@@ -2,7 +2,7 @@
 
 A follow-up to the 2006 standalone noise-maker [Xynthi](https://mockfuneral.github.io/2020/12/11/xynthi), originally inspired by the EMS Synthi A, but not an emulation. Xynthii is rebuilt from the ground up and contains some additions and consolidations, upgraded oscillators and filters, and a host of UX improvements and features.
 
-![Screenshot of xynthii](https://github.com/mphonic/xynthii/blob/master/images/xynthii-gui.png)
+![Screenshot of xynthii](https://github.com/mphonic/xynthii/blob/main/images/xynthii-gui.png)
 
 # Donate
 [Venmo](https://account.venmo.com/u/Bhob-Rainey)
