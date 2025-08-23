@@ -29,6 +29,8 @@ There are instructions in the sc3-plugins README that explain how to install. Th
 2. Drag the unzipped folders into your Extensions folder. Some extensions may have different folders for different architectures, like one for 32-bit systems vs 64-bit. Choose the one that is appropriate for your system.
 3. Close and reopen Supercollider. You should be good to go. You can test by opening `test-install.scd` and running the code.
 
+If you are using OSX and your system is attempting to quarantine the extensions, see the section at the bottom of this document, [Mac Users and Quarantine](#mac-users-and-quarantine).
+
 ## Important Supercollider Key Commands
 
 1. Run a single line of code: Put your cursor on the line and hit shift-Enter (Windows / Linux) or shift-Return (Mac).
@@ -68,7 +70,7 @@ The [Donate](#donate) button reminds you to donate. Did I mention that it really
 
 Buttons with the "^" symbol allow you to sync a given module with another one. 
 
-With the oscillators, O2 and O3 can be synced with the frequency of O1. The frequency knobs then express intervals from O1 frequency. O2 and O3 will follow modulations of O1's frequency when synced. You can add individual modulation to synced oscillator frequencies by modulating `freqscale` rather than `freq` (`freqscale` will have to be something other than 0 for modulation to occur). See The Mod Pod section below.
+With the oscillators, O2 and O3 can be synced with the frequency of O1. The frequency knobs then express intervals from O1 frequency. O2 and O3 will follow modulations of O1's frequency when synced. You can add individual modulation to synced oscillator frequencies by modulating `freqscale` rather than `freq` (`freqscale` will have to be something other than 0 for modulation to occur). See [The Mod Pod](#the-mod-pod) section below.
 
 With the envelopes, E2 and E3 can be gated via E1's gate using the "^" buttons. 
 
@@ -117,7 +119,7 @@ Move a node to change its position. To add a node, double click between existing
 
 You can copy E2 to E3 and vice versa by hitting the respective ">" or "<" button between them.
 
-Using the envelopes in the traditional sense of "putting a sound through an envelope" requires you to route an envelope to `V1 env` and / or `V2 env` (and then route a sound to `V1` and / or `V2`). See The Routing Matrix below. These are VCA-type modules, and it is possible to route signals besides envelopes to them for effects like ring modulation. Note that the default preset routes all oscillators and the noise generator to `V1` and routes E1 (the trapezoid) to `V1 env`. This is a fairly standard envelope configuration, which can, of course, be altered and made more complex. 
+Using the envelopes in the traditional sense of "putting a sound through an envelope" requires you to route an envelope to `V1 env` and / or `V2 env` (and then route a sound to `V1` and / or `V2`). See [The Routing Matrix](the-routing-matrix) below. These are VCA-type modules, and it is possible to route signals besides envelopes to them for effects like ring modulation. Note that the default preset routes all oscillators and the noise generator to `V1` and routes E1 (the trapezoid) to `V1 env`. This is a fairly standard envelope configuration, which can, of course, be altered and made more complex. 
 
 ## The Routing Matrix
 
@@ -152,3 +154,7 @@ The modulation in the mod pod is "linear", which means in practice that it modul
 ## Bypassing Modules
 
 For modules that make sound (as opposed to modules like envelopes), you can double-click on the module to bypass it. This will silence modules like oscillators, and it will cause a signal to pass unaffected through effects like reverb and delay. Double-click again to unbypass. Individual modulations in the mod pod can also be bypassed in this way.
+
+## Mac Users and Quarantine
+
+It's possible that OSX will complain about the extensions and try to quarantine them. If this is the case, you can unquarantine them by opening the terminal and running `xattr -c <the_extensions_folders_with_scx_files_in_them>/*.scx`. You'll need to run this for each extension. Use `Platform.userExtensionDir` as above to find the main extensions folder, open it in the Finder, then go into each extension folder and find the folder that has files that end in `.scx`. To get the whole `<the_extensions_folder_with_scx_files_in_them>`, select the folder you just found and hit option-command-c. This should copy the path, which you can then paste into the above command; i.e., `xattr -c /Users/me/Library/SuperCollider/Extensions/SC3plugins/*.scx`. 
