@@ -8,7 +8,24 @@ Quit and reopen Supercollider. If you want to double-check installation, open te
 (
 var arc = Platform.architecture,
 ext = Platform.userExtensionDir,
-dir = Document.current.dir ++ "/extensions";
+dir = Document.current.dir ++ "/extensions",
+unquarantine;
+
+unquarantine = {|ext|
+	(ext ++ "/*").pathMatch
+	.select({|p|
+		"^[.]".matchRegexp(p).not;
+	})
+	.do({|p|
+		("(.scx)$".matchRegexp(p)).if({
+			("xattr -rd com.apple.quarantine " ++ p).unixCmd;
+		}, {
+			(File.type(p) == \directory).if({
+				unquarantine.value(p);
+			});
+		});
+	});
+};
 
 Platform.case(
 	\linux, { "Please follow instructions in README to install extensions.".postln; },
@@ -77,10 +94,19 @@ Platform.case(
 			("Oversampling".matchRegexp(name)).if({
 				name = "OversamplingOscillators";
 				path = path ++ "/" ++ name;
+			}, {
+				("PortedPlugins".matchRegexp(name)).if({
+					name = "PortedPlugins";
+					path = path ++ "/install/" ++ name;
+				});
 			});
 			dest = ext ++ "/" ++ name;
 			("cp -r '" ++ path ++ "' '" ++ ext ++ "/'").unixCmd;
 			dest;
+		})
+		.collect({|path|
+			unquarantine.value(path);
+			path;
 		})
 		.collect({|path|
 			(File.exists(path).not).if({
