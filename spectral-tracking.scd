@@ -69,7 +69,7 @@ v = x.verb[\controls];
 		Select.ar(reverse, [in, xin]),
 		2,
 		2,
-		LFNoise2.kr(0.25).range(0, 2.0),
+		LFNoise2.kr(0.25).range(0, len),
 		len,
 		threshold: 0.0001
 	);
