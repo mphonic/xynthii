@@ -1,0 +1,130 @@
+TITLE:: FM7aOS
+summary:: an oversampled 4 oscillator cluster
+categories:: UGens>Oscillator
+related:: FM7bOS, FM7OS
+
+DESCRIPTION::
+4 oscillators, each able to be any of the 4 basic waveforms, and each able to modulate one another with 0 or 1 sample delay at the oversampling frequency. in other words, at 96K, these could modulate each other 1.536 million times per second. 
+
+FM7aOS and FM7bOS are similar; FM7aOS uses Chowning style through-zero modulation. FM7bOS uses analog synth "1V/Oct" style modulation.
+
+CLASSMETHODS::
+
+METHOD:: ar
+
+
+ARGUMENT:: ctlMatrix
+a 4 value array, with each value being an audio-rate frequency value for the 4 oscillators
+
+ARGUMENT:: modMatrix
+a 4X4 matrix, with each 4 value sub-array being the amount the current oscillator is modulated by the other oscillators
+
+ARGUMENT:: synthTypes
+a 4 value array, with each value indicating the type of oscillator to use
+0=Sine Wave, 1=Triangle, 2=Square, 3=Saw
+
+ARGUMENT:: oversample
+OverSampling Index
+
+0 = none, 1 = 2x, 2 = 4x, 3 = 8x, 4 = 16x
+
+ARGUMENT:: mul
+mul
+
+ARGUMENT:: add
+add
+
+
+EXAMPLES::
+
+code::
+(
+    {
+        var ctls, mods, chans, synth_type;
+        ctls = [
+            // freq
+            400, 300, 300*3/4, 0
+        ];
+        //modulation amount from each oscillator
+        mods = [
+            [0, MouseX.kr(0,2000), 0, 0],
+            [MouseY.kr(0,2000),0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ];
+        chans = [0,0];
+        //0 = sine, 1 = tri, 2 = square, 3 = saw
+        synth_type = [3,2,0,0];
+        FM7aOS.ar(ctls, mods*2, synth_type).slice(chans) * 0.1;
+    }.scope;
+)
+
+//a gui controlling 3 synths feeding back on each other
+
+(
+    var win, gui;
+    var synth = {
+        var ctls, mods, chans, sound;
+        ctls = [
+            // freq, phase, amp
+            \freq0.kr(200),
+            \freq1.kr(200),
+            \freq2.kr(200),
+            0
+        ];
+        mods = [
+            [0, \mod0.kr(250), \mod1.kr(250), 0],
+            [\mod2.kr(250), 0, \mod3.kr(250), 0],
+            [\mod4.kr(250), \mod5.kr(250), 0, 0],
+            [0, 0, 0, 0]
+        ];
+        chans = [0,0];
+        sound = FM7aOS.ar(ctls, mods, [\osc0.kr(2),\osc1.kr(3),\osc2.kr(3)], 4).softclip;
+
+        sound[0].dup*0.1;
+
+    }.play;
+
+    var labels = ["freq0", "freq1", "freq2", "mod0", "mod1", "mod2", "mod3", "mod4", "mod5", "osc0", "osc1", "osc2"];
+
+    var specs = [ControlSpec(0.01,4000, 'exp'), ControlSpec(0,3000), ControlSpec(0,3,'lin', 1)];
+
+    var label_boxes = labels.size.collect{|i| StaticText().string_(labels[i])};
+
+    var boxes = labels.size.collect{|i| NumberBox()};
+
+    var sliders = labels[0..2].collect{|item, i| 
+        Slider().action_{|sl| 
+            var num = specs[0].map(sl.value); 
+            synth.set(labels[i].asSymbol, num); 
+            boxes[i].value_(num)
+        }}
+        .addAll(labels[3..8].collect{|item, i| 
+            Slider().action_{|sl| 
+                var num = specs[1].map(sl.value); 
+                synth.set(labels[i+3].asSymbol, num); 
+                boxes[i+3].value_(num)
+            }})
+        .addAll(labels[9..11].collect{|item, i| 
+            Slider().action_{|sl| 
+                var num = specs[2].map(sl.value); 
+                synth.set(labels[i+9].asSymbol, specs[2].map(sl.value)); 
+                boxes[i+9].value_(num)
+            }});
+
+    sliders.do{|slider| slider.valueAction_(1.0.rand)};
+
+
+    win = Window("");
+    win.layout = 
+    VLayout(
+        HLayout(*label_boxes),
+        HLayout(*sliders),
+        HLayout(*boxes)
+    );
+    win.front;
+
+    win.onClose_({synth.free});
+)
+
+::

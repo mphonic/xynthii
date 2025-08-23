@@ -1,0 +1,41 @@
+CLASS:: VosimOsc
+SUMMARY:: Vosim oscillator
+RELATED::HelpSource/Overview/PortedPlugins
+CATEGORIES::UGens>Oscillator
+
+DESCRIPTION::
+Two sinewaves multiplied by and sync'ed to a carrier.
+
+Original code by E. Gillet. Revisted by Ben Sergentanis for the LINK::https://github.com/electro-smith/DaisySP##DaisySP DSP library::. Ported to SuperCollider by Mads Kjeldgaard.
+
+CLASSMETHODS::
+
+METHOD::kr, ar
+
+argument::freq
+Frequency in herz
+
+argument::form1freq
+Formant 1 frequency in herz
+
+argument::form2freq
+Formant 2 frequency in herz
+
+argument::shape
+Waveshaping. -1.0 to 1.0.
+
+EXAMPLES::
+
+code::
+(
+Ndef(\yo, { 
+	VosimOsc.ar(
+		freq: SinOsc.kr(SinOsc.kr(0.01)).exprange(10,800), 
+		form1freq: SinOsc.kr([0.5,0.1]).exprange(100,1000), 
+		form2freq: SinOsc.kr(0.39).exprange(100,1000), 
+		shape: SinOsc.kr(10)
+	) 
+}).play;
+)
+::
+

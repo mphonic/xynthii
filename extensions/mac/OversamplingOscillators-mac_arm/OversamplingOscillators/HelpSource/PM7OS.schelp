@@ -1,0 +1,199 @@
+class:: PM7OS
+summary:: Oversampled phase modulation oscillator matrix.
+categories:: UGens>Oscillator
+related:: SawBL, SquareBL, TriBL, ImpulseBL, SinOscOS, TriOS, SawOS, SquareOS, VarSawOS, PMOscOS, PM7OS, FM7OS
+
+Description::
+PM7OS implements a 6x6 oscillator matrix, where each oscillator's phase can be modulated by any of the other oscillators' output. This is the same circuit as Stefan Kersten's classic FM7, but now with oversampling to encourage extreme settings. This UGen is overly luxurious and not at all efficient as all inputs are audio rate at all times.
+
+While fully functional, some outcomes are different from FM7, so I would say this is still a work in progress.
+
+classmethods::
+
+method::ar
+
+The UGen expects two matrices: one for oscillator parameter control, one for phase modulation. It outputs six channels, one for each oscillator. To select specific outputs, you can use array methods like code::at(indices):: or code::slice(indices)::.
+
+argument::ctlMatrix
+
+specifies the three parameters strong::frequency:: (can be modulated at control rate), strong::phase:: (set at initialization only) and strong::amplitude::.(control rate):
+
+code::
+// freq, phase, amp
+[ [ 300, 0,    1   ],
+  [ 400, pi/2, 1   ],
+  [ 730, 0,    0.5 ],
+  [ 0,   0,    0   ],
+  [ 0,   0,    0   ],
+  [ 0,   0,    0   ] ]
+::
+
+argument::modMatrix
+
+The modulation matrix specifies the amount of modulation each oscillator
+output has on another oscillator's phase. Row i in the matrix refer to
+oscillator i's phase input and the columns denote the amount of phase
+modulation in radians. NOTE THAT THE PHASE VALUES ARE BETWEEN 0 AND 2 INSTEAD OF 0 AND 2pi, SO FM7 MOD MADRIX NEEDS TO BE DIVIDED BY PI TO GET SIMILAR RESULTS TO FM7.
+
+The UGen outputs the six individual oscillator signals.
+
+code::
+(
+{
+	var ctls, mods, chans;
+	ctls = [
+		// freq, phase, amp
+		[LFNoise1.kr(0.5).range(300, 310), 0, 1],
+		[LFNoise1.kr(0.5).exprange(3, 310), 0, 1],
+		[LFNoise1.kr(0.5).exprange(3, 100), 0, 1],
+		[LFNoise1.kr(0.5).exprange(3, 100), 0, 1],
+		[LFNoise1.kr(0.5).exprange(3, 100), 0, 1],
+		[LFNoise1.kr(0.5).exprange(3, 100), 0, 1]
+	];
+	mods = [
+		[Line.kr(0, 0.001, 2), Line.kr(0.1, 0, 4), 0, MouseY.kr(0, 6), 0, 0],
+		[MouseX.kr(0, 6), 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0]
+	];
+	chans = [0, 1];
+	PM7OS.ar(ctls, mods, 4).slice(chans) * -12.dbamp; // using "slice" to select specific channels
+}.play;
+)
+::
+
+method::arAlgo
+
+Provided a number for a wiring (called 'algorithm' in the FM-world), returns an instance that has this setup. All 32 algorithms from the DX7 are implemented.
+
+argument::algo
+
+The id of the algorithms [0..31]
+
+the algo argument chooses the algorithm when the ugen is instantiated. It cannot be modulated.
+
+argument::ctlMatrix
+
+See above.
+
+argument::feedback
+
+One global parameter used in all places where the interconnections result in feedback.
+
+code::
+(
+{
+	var ctls = [
+		// freq, phase, amp
+		[LFNoise1.kr(0.5).range(300, 310), 0, 1],
+		[LFNoise1.kr(0.5).exprange(3, 310), 0, 1],
+		[LFNoise1.kr(0.5).exprange(3, 100), 0, 1],
+		[LFNoise1.kr(0.5).exprange(3, 100), 0, 1],
+		[LFNoise1.kr(0.5).exprange(3, 100), 0, 1],
+		[LFNoise1.kr(0.5).exprange(3, 100), 0, 1]
+	];
+	PM7OS.arAlgo(1, ctls, MouseX.kr(0, 2)/pi, 4)*0.2
+}.play
+
+)
+
+//pretty close to the original
+(
+{
+	var ctls = [
+		// freq, phase, amp
+		[LFNoise1.kr(0.5).range(300, 310), 0, 1],
+		[LFNoise1.kr(0.5).exprange(3, 310), 0, 1],
+		[LFNoise1.kr(0.5).exprange(3, 100), 0, 1],
+		[LFNoise1.kr(0.5).exprange(3, 100), 0, 1],
+		[LFNoise1.kr(0.5).exprange(3, 100), 0, 1],
+		[LFNoise1.kr(0.5).exprange(3, 100), 0, 1]
+	];
+	FM7.arAlgo(1, ctls, MouseX.kr(0, 2), 4)*0.2
+}.play
+
+)
+
+
+::
+
+section::Examples
+
+code::
+
+(
+{
+	var ctls, mods, chans, freq;
+	freq = LFNoise0.kr(3).exprange(200, 310);
+	ctls = [
+		// freq, phase, amp
+		[freq, 0, 1],
+		[freq, 0, 1],
+		[LFNoise2.kr(0.5).exprange(3, 80), 0, 1],
+		[LFNoise2.kr(0.5).exprange(3, 800), 0, 1],
+		[LFNoise2.kr(0.5).exprange(3, 800), 0, 1],
+		[LFNoise2.kr(0.5).exprange(0.3, 10), 0, 1]
+	];
+	mods = [
+		{ LFNoise1.kr(0.5).max(0) } ! 6 * MouseX.kr(0, 3),
+		{ LFNoise1.kr(0.5).max(0) } ! 6 * MouseY.kr(0, 3),
+		{ LFNoise1.kr(0.5).max(0) } ! 6 * MouseY.kr(0, 3),
+		{ LFNoise1.kr(0.5).max(0) } ! 6 * MouseX.kr(0, 3),
+		{ LFNoise1.kr(0.5).max(0) } ! 6 * MouseY.kr(0, 3),
+		{ LFNoise1.kr(0.5).max(0) } ! 6 * MouseY.kr(0, 3)
+	];
+	chans = PM7OS.ar(ctls, mods/pi, 4).slice([0, 1]) * -12.dbamp;
+}.play;
+)
+
+
+(
+// Courtesy Fredrik Olofsson (2008)
+Routine.run{
+    var syn, time = 3; // Allow each patch to run for 3 secs
+    inf.do{|i|
+        ("// FM7 patch"+i).post;
+        syn= ("
+            (
+            var x= #"++({{{ |i| rrand(0.5, 1.5).round(0.5)}!4}!3}!6).asCompileString++";
+            var y= #"++({{{ |i| rrand(0.2, 1.6).round(0.5)}!4}!6}!6).asCompileString++";
+            {
+                var ctls= x.collect{|a| a.collect{|b| LFSaw.ar(*b)}};
+                var mods= y.collect{|a| a.collect{|b| LFPulse.kr(*b)}};
+                var chans= #[0, 1];
+                PM7OS.ar(ctls, mods/(1pi), 1).slice(chans)*0.8;
+            }.play)").postln.interpret;
+        time.wait;
+        syn.free;
+    };
+};
+)
+
+//audio rate inputs can be used in all input parameters
+(
+{
+    var ctls, mods, chans;
+    ctls = [
+        // freq, phase, amp
+        [MouseX.kr(2, 2000), 0, LFPulse.ar(LFNoise2.ar(1).range(10,100)).lag(0.02)],
+        [MouseY.kr(2, 2000), 0, LFPulse.ar(LFNoise2.ar(1).range(10,100)).lag(0.02)],
+        [LFNoise2.ar(100).range(800,1000), 0, 1],
+        [300+SinOsc.ar(301,0,1000), 0, 1],
+        [10, 0, 1],
+        [LFNoise0.ar(20).range(300,1000), 0, 1]
+    ];
+    mods = [
+        [0.1, 0, LFNoise2.ar(0.3).range(0.1,0.5), 0, 0, 0],
+        [LFNoise2.ar(0.34).range(0,1), 0, 0, 0, 0, 0],
+        [0, 0, 0, 0.02, 0, 1],
+        [0, 0, 0, 0, WhiteNoise.ar(1), 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0]
+    ];
+    chans = [0,1];
+    PM7OS.ar(ctls, mods*2, 4).slice(chans) * 0.3;
+}.scope;
+)
+::

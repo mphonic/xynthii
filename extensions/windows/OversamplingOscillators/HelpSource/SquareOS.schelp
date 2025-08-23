@@ -1,0 +1,76 @@
+TITLE:: SquareOS
+summary:: Oversampled Squarewave Oscillator
+categories:: UGens>Oscillator
+related:: SawBL, SquareBL, TriBL, ImpulseBL, SinOscOS, TriOS, SawOS, SquareOS, VarSawOS, PMOscOS, PM7OS, FM7OS
+
+DESCRIPTION::
+An oversampled Squarewave oscillator using Jatin Chowdhurry's oversampling library from ChowDSP
+
+
+CLASSMETHODS::
+
+METHOD:: ar
+
+ARGUMENT:: freq
+frequency - FM is possible
+
+ARGUMENT:: phase
+values are between 0 and 2 or -1 and 1
+phase - PM is possible
+
+ARGUMENT:: width
+width of the Square. values are between 0 and 1 - 0.5 is an even square. fully modulate-able with .ar signals.
+
+ARGUMENT:: oversample
+OverSampling Index
+
+0 = none, 1 = 2x, 2 = 4x, 3 = 8x, 4 = 16x
+
+ARGUMENT:: mul
+mul
+
+ARGUMENT:: add
+add
+
+
+EXAMPLES::
+
+code::
+{SquareOS.ar(MouseX.kr(-1000,10000), 0, 0.5, 1, 0.1)}.scope; //not bad
+
+{SquareOS.ar(MouseX.kr(-1000,10000), 0, 0.5, 4, 0.1)}.scope; //real nice
+
+//phase offset works
+{SquareOS.ar(400, 0)}.plot;
+{SquareOS.ar(400, -0.5)}.plot;
+{SquareOS.ar(400, 1)}.plot;
+
+//phase modulation works
+{SquareOS.ar(0, LFSaw.ar(400))}.plot;
+
+//kind of weird
+{SquareOS.ar(200, SinOsc.ar(400)*Line.ar(0,2,10), 0.5, 2, 0.1)}.scope;
+
+//modulate the width
+{SquareOS.ar(200, 0, SinOsc.ar(8).range(0,1), 2, 0.1)}.scope;
+
+//Frequency modulation is possible
+({SquareOS.ar(MouseX.kr(200,4000)+
+	(LFTri.ar(MouseY.kr(200,4000))*3000), 0, SinOsc.ar(8).range(0.1,0.9), 4, 0.2).dup
+}.play)
+
+
+//Extreme Modulation is possible.
+
+({
+	var locIn=LocalIn.ar(1);
+	var feedbackMul = 5000;
+	var mod = feedbackMul*SquareOS.ar((MouseY.kr(0, 8000)+(locIn*2000)));
+
+	var car = SquareOS.ar(
+		(MouseX.kr(1, 8000)
+			+(mod)), 0, 0.5,4);
+	LocalOut.ar(car);
+	car.dup*0.2
+}.scope)
+::

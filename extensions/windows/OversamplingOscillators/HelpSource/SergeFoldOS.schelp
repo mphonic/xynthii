@@ -1,0 +1,104 @@
+TITLE:: SergeFoldOS
+summary:: Oversampled Wavefolder based loosely on the Serge Wavefolder
+categories:: UGens>Distortion
+related:: BuchlaFoldOS, SinOscOS, TriOS, SawOS, SquareOS, VarSawOS, PMOscOS, PM7OS, FM7OS
+
+DESCRIPTION::
+A wavefolder in the shape of the classic Serge wavefolder.  Derived from LINK::http://research.spa.aalto.fi/publications/papers/smc17-wavefolder/##Virtual Analog Model of the Lockhart Wavefolder::
+by Esqueda, etc. The paper uses virtual analog methods to model the Serge wavefolder.  This ugen is based on the paper, but is not a direct translation.  Instead it uses a modified Chebyshev polynomial to approximate the transfer function of the Serge wavefolder.
+
+CLASSMETHODS::
+
+METHOD:: ar
+
+ARGUMENT:: sig
+the incoming signal
+
+ARGUMENT:: amp
+amplitude multiplier. This value should be between 0 and 1. 
+
+ARGUMENT:: oversample
+OverSampling Index
+
+0 = none, 1 = 2x, 2 = 4x, 3 = 8x, 4 = 16x
+
+ARGUMENT:: mul
+mul
+
+ARGUMENT:: add
+add
+
+EXAMPLES::
+
+code::
+(
+    {
+        var sig = SinOsc.ar(40);
+        var amp = MouseX.kr(0,1).poll;
+        var out = SergeFoldOS.ar(sig, amp, 1);
+        out.dup
+    }.scope
+)
+
+//in pure sc, this code looks like this (without the oversampling):
+
+//make the transfer function
+(
+    t = Signal.chebyFill(1060, [1,0,1,0,1,0,1,0,1,0,1,0,1]);
+    t = t.copyRange(30,1029).normalize;
+    t.plot;
+    b = Buffer.loadCollection(s, t.reverse.asWavetableNoWrap)
+);
+
+//play through the Shaper
+(
+    {
+        c = SinOsc.ar(40, 0, MouseX.kr(0,1).poll);
+        d = Shaper.ar(
+            b,
+            c,
+            1
+        );
+        
+        d.tanh.dup
+    }.scope(bufsize:1600);
+)
+
+//overdriving the amplitude above 1 results in a louder signal hitting the internal tanh function
+(
+    {
+        var sig = SinOsc.ar(40);
+        var amp = MouseX.kr(0,2).poll;
+        var out = SergeFoldOS.ar(sig, amp, 1);
+        out.dup
+    }.scope
+)
+
+//any signal can be used
+(
+    {
+        var sig = SinOscOS.ar(MouseX.kr(20,1000)+
+        (SquareOS.ar(MouseY.kr(20,1000))*300), 0, 4);
+        
+        var amp = MouseX.kr(0,1.5).poll;
+        var out = SergeFoldOS.ar(sig, amp, 4);
+
+        out.dup
+    }.scope
+)
+
+(
+    {
+        var sig = VarSawOS.ar(MouseX.kr(20,1000)+
+        (SquareOS.ar(MouseY.kr(20,1000))*300), 0, SinOsc.ar(0.2).range(0.15,0.85), 4);
+        
+        var amp = MouseX.kr(0,4).poll;
+        var out = LPF.ar(out, 400);
+        out = SergeFoldOS.ar(sig, amp, 4);
+    
+        out.dup
+    }.scope
+)
+
+::
+

@@ -1,0 +1,139 @@
+TITLE:: ShaperOS2
+summary:: a variable waveshaper that extends the functionality of Shaper
+categories:: Undocumented classes, UGens>Undocumented
+related:: ShaperOS, Shaper
+
+DESCRIPTION::
+ShaperOS2 is a variable waveshaper. It performs the same waveshaping function as Shaper or ShaperOS, but it can also change the shape of the distorion lookup table by interpolating between adjacent tables.
+
+Like ShaperOS, ShaperOS2 uses standard buffers and does not require the wavetable format buffers that Shaper needs.
+
+
+CLASSMETHODS::
+
+METHOD:: ar
+Audio rate is the only rate available
+
+ARGUMENT:: buffer
+the buffer containing a series of different waveshaping lookup tables
+
+ARGUMENT:: input
+the audio input to the UGen
+
+ARGUMENT:: buf_divs
+how many waveshaping lookup tables there are in the buffer
+
+ARGUMENT:: buf_loc
+from 0-1, the location in the buffer of the current waveshaper. 0 is the first - 1 is the last - all other tables exist between 0 and 1. the algorithm will interpolate between adjacent waveshaper tables
+
+ARGUMENT:: oversample
+OverSampling Index
+
+0 = none, 1 = 2x, 2 = 4x, 3 = 8x, 4 = 16x
+
+ARGUMENT:: mul
+mul
+
+ARGUMENT:: add
+add
+
+
+EXAMPLES::
+
+code::
+
+//fill a buffer with a series of different distortion algorithms
+(
+    ~shaperBuf = Signal.chebyFill(2048, [1])
+    .addAll(Signal.chebyFill(2048, [1,0,-1]))
+    .addAll(Signal.chebyFill(2048, [1,0,-1,0,1]))
+    .addAll(Signal.chebyFill(2048, [1,0,-1,0,1,0,-1]))
+    .addAll(Signal.chebyFill(2048, [1,0,-1,0,1,0,-1,0,1]));
+
+    ~shaperBuf = Buffer.loadCollection(s, ~shaperBuf.flatten);
+)
+
+//check out the buffer
+~shaperBuf.plot
+
+//hear the variable distortion
+({
+    var sig = SinOsc.ar(50, 0, 1);
+
+    sig = ShaperOS2.ar(~shaperBuf, sig, 5, MouseX.kr.poll, 2);
+
+    sig.dup*0.1*MouseX.kr(1,5)
+}.scope
+)
+
+//make an extreme version going from 1 to 257 partials
+(
+    var cheby_list = List[[1]];
+    127.do{
+        var last_array = cheby_list.last;
+        cheby_list.add(last_array.deepCopy.addAll([0,last_array.last.neg]))
+    };
+    ~shaperBuf2 = cheby_list.collect{|array| Signal.chebyFill(2048, array)};
+
+    ~shaperBuf2 = Buffer.loadCollection(s, ~shaperBuf2.flatten, 1, {"done".postln});
+)
+
+//128 waveshaping tables in series
+~shaperBuf2.plot
+
+//hear the odd harmonics added to the sine wave up to the 257th harmonic
+({
+    var sig = SinOsc.ar(100, 0, 0.9);
+
+    sig = ShaperOS2.ar(~shaperBuf2, sig, 128, MouseX.kr, 2);
+
+    sig.dup*0.1*MouseX.kr(1,6);
+}.scope
+)
+
+//A mockup of the Roar Saturator
+
+(
+    //fill a signal with 19 progressively aggressive tanh waveshapers
+    ~sig = (2..20).collect{|i| Env([i.neg, i],[1]).asSignal(2048).tanh.normalize}.flatten;
+    
+    //see the shape of the waveshaper 
+    ~sig.plot;
+    
+    //load the shaper into a buffer
+    b = Buffer.loadCollection(s, ~sig);
+)
+
+//hear what it does to a sin wave
+(
+{
+    var drive = MouseY.kr(0,1);
+    
+    var sig = SinOsc.ar(100, 0, drive);
+    
+    sig = ShaperOS2.ar(b, sig, 19, MouseX.kr, 2);
+    sig.dup*0.3
+}.scope
+)
+
+//load an audio buffer
+c = Buffer.read(s, "/Users/spluta1/Library/Application Support/SuperCollider/sounds/AmenBreak.wav");
+
+
+(
+    {
+        var local_in = LocalIn.ar(2);
+        var drive = MouseY.kr(0,1);
+
+        var sig = PlayBuf.ar(2, c, BufRateScale.kr(c), loop:1)+local_in;
+        var dc = SinOsc.ar(0.2, 0, 0.01); //some DC offset
+        
+        //some kind of clipping is important here, as we could easily get values over 1 otherwise
+        sig = (sig*drive+dc).tanh;
+        
+        sig = ShaperOS2.ar(b, sig, 19, LFNoise2.ar(1).range(0,1), 4);
+        LocalOut.ar(DelayC.ar(sig, 0.2, MouseX.kr(0.01,0.2))*0.2);
+        sig*0.1
+    }.scope
+)
+::

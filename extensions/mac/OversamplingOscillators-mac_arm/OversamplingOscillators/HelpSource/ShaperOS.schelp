@@ -1,0 +1,91 @@
+class:: ShaperOS
+summary:: Wave shaper.
+related:: ShaperOS2, Classes/Shaper, BuchlaFoldOS, SergeFoldOS, OscOS
+categories::  UGens>Buffer
+
+Description::
+Performs waveshaping on the input signal by indexing into the table. This
+
+classmethods::
+method::ar, kr
+
+argument::buffer
+The number of a buffer containing the transfer function. This differs from Shaper in that ShaperOS takes standard buffers, not wavetable format buffers.
+
+argument::in
+The input signal.
+
+argument::oversample
+OverSampling Index
+
+0 = none, 1 = 2x, 2 = 4x, 3 = 8x, 4 = 16x
+
+Examples::
+code::
+s.boot;
+
+//fill a buffer with a Lockhardt wavefolder shaped function
+(
+
+    e = Env.new([-1,0.66,-0.66,0.66,-0.66,0.66,-0.66,0.66,-0.66,1],[150,100,100,100,100,100,100,100,150]);
+    e = e.asSignal(5000);
+
+    //low pass filter the env
+    ~last = -1;
+    f = e.collect{|item,i|
+        var coef = 0.97;
+        item = (1-coef.abs*item)+(~last*coef); ~last = item;
+        item
+    };
+    f = e.reverse.collect{|item,i|
+        var coef = 0.97;
+        item = (1-coef.abs*item)+(~last*coef); ~last = item;
+        item
+    }.reverse;
+    [e,f].plot;
+    b = Buffer.loadCollection(s, f.as(Signal));
+)
+
+(
+    //read into the table
+    {
+        var amp = MouseX.kr(0,8).poll;//.bilin(0.5, 0, 1, 0.9, 0, 2).poll;
+        c = SinOsc.ar(MouseY.kr(20,300), 0, amp).tanh*0.99;
+        d = ShaperOS.ar(
+            b,
+            c,
+            2,
+            1
+        );
+
+        ((d*2).tanh*0.1).dup
+
+    }.scope(bufsize:1600);
+)
+
+//an example with tanh distortion
+(
+    ~tanh_buf = Env([2.neg, 2],[1]).asSignal(2048).tanh.normalize;
+    ~tanh_buf.plot;
+    ~tanh_buf = Buffer.loadCollection(s, ~tanh_buf);
+)
+(
+    //read into the table
+    {
+        var amp = MouseX.kr(0,8).poll;//.bilin(0.5, 0, 1, 0.9, 0, 2).poll;
+        c = SinOsc.ar(MouseY.kr(20,300), 0, amp).tanh*0.99;
+        d = ShaperOS.ar(
+            ~tanh_buf,
+            c,
+            2,
+            1
+        );
+
+        ((d*2).tanh*0.1).dup
+
+    }.scope(bufsize:1600);
+)
+
+::
+
+

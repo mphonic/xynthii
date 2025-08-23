@@ -1,0 +1,323 @@
+TITLE:: OscOS3
+summary:: Oversampled 3D Wavetable Oscillator
+categories:: UGens>Oscillator
+related:: OscOS, BuchlaFoldOS, ShaperOS, ShaperOS2
+
+DESCRIPTION::
+
+OscOS3 is an oversampled 3D wavetable oscillator which takes a multichannel multi-wavetable buffer, allowing transformation between waveforms, rapid scanning of wavetables, and completely alias-free playback. 
+
+OscOS3 provides an internal class function, make_oscos3_mipmap, which will take any wariable waveform and convert it to a multi-octave filtered waveform with N wavetables per octave. The result is a multichannel buffer with each channel being an increasing filtered version of the original buffer. THIS FUNCTIONALITY REQUIRES THE BufFFT LIBRARY, which is used to quickly process the buffer in NRT mode.
+
+The oscillator uses an internal sawtooth wave to look into the oscillator wavetable. If provided an optional phase buffer (or variable phase buffer), the user can alter the shape of the lookup phasor over time. 
+
+OscOS3 also provides a sync trigger to reset the phase of the buffer. This allows hard syncing of the oscillator to other oscillators.
+
+CLASSMETHODS::
+
+METHOD:: ar
+audio rate wavetable processing
+
+ARGUMENT:: sound_buf
+a 3D buffer of variable wavetables; the suggested format is a buffer with N wavetables from left to right in the first channel, with each subsequent channel being an fft filtered version of the buffer with fewer and fewer harmonics. see make_oscos3_mipmap for more information on building this buffer.
+
+ARGUMENT:: phase_buf
+OscOS3 uses an internal oversampled sawtooth to read the sound buffer. If given valid phase buffer, OscOS3 will use the internal sawtooth wave to read through phase_buf, allowing a variable or alternate shaped wavetable lookup. If set to -1 or given an invalid buffer, OscOS3 will use the internal sawtooth wave as the phase lookup.
+
+The phase buffer should be a 2D buffer containing a variable wavetable with as many variations as the user likes. 
+
+ARGUMENT:: freq
+the frequency of the oscillator
+
+ARGUMENT:: phase
+the initial phase of the oscillator and a modulatable value for phase modulation. also the value the signal will jump to when given a reset trigger.
+
+ARGUMENT:: sync_trig
+an oscillator or trigger that triggers OscOS3 to reset its phase back to the value currently in the phase argument
+
+ARGUMENT:: buf_divs
+number of divisions of the phase buffer.
+
+ARGUMENT:: buf_loc
+a value between 0 and 1 that determines the location in the phase buffer to read from.
+
+ARGUMENT:: num_chans
+the number of vertical channels to the sound buffer. 
+
+ARGUMENT:: chan_loc
+a value between 0 and 1 that determines the channel location in the sound buffer to read from.
+
+ARGUMENT:: phase_buf_divs
+number of divisions of the phase buffer.
+
+ARGUMENT:: phase_buf_loc
+a value between 0 and 1 that determines the location in the phase buffer to read from.
+
+ARGUMENT:: oversample
+0 = none, 1 = 2x, 2 = 4x, 3 = 8x, 4 = 16x
+
+a nice feature of the 3D wavetable is the oversampling should not need to go above 2x or 4x
+
+ARGUMENT:: mul
+mul
+
+ARGUMENT:: add
+add
+
+METHOD:: make_oscos3_mipmap
+THIS REQUIRES THE BufFFT LIBRARY TO BE INSTALLED AS WELL. make_oscos3_mipmap creates a 3D buffer of variable wavetables for use with OscOS3. The user provides a single channel buffer with N wavetables loaded in it and the function produces a 3D buffer with N wavetables from left to right and M fft filtered versions of the buffer with increasingly fewer and fewer harmonics in each channel. The last channel should contain only a sine wave in each wavetable.
+
+ARGUMENT:: server
+the local server
+
+ARGUMENT:: path
+a path from wich to load the one channel sound buffer
+
+ARGUMENT:: fft_size
+the size of the fft to use for filtering, which corresponds to the number of wavetables in the given variable wavetable.
+
+ARGUMENT:: filts_per_octave
+number of filtered channels per octave. the resultant number of channels will be fft_size.log2*filts_per_octave+1 
+
+ARGUMENT:: normalize_link_chans
+if true, the channels of the wavetables will be normalized to one maximum. if false, the channels will each be normalized individually.
+
+ARGUMENT:: action
+a function to be called when the NRT process is completed. use this to load the resultant buffer onto the local server.
+
+returns:: a 3D array of wavetables
+
+
+
+INSTANCEMETHODS::
+
+EXAMPLES::
+
+code::
+//create a 4 oscillator variable wavetable
+(
+    ~fft_size = 4096;
+    ~signal = Signal.sineFill(~fft_size, [1])
+        .addAll(Env([0,1,-1,0],[1,2,1]).asSignal(~fft_size))
+        .addAll(Env([0,1,1,-1,-1,0],[0,1,0,1,0]).asSignal(~fft_size))
+        .addAll(Env([0,1,-1,0],[1,0,1]).asSignal(~fft_size));
+    
+    //Signal.write requires the SignalBox quark...which you can download with one click. Highly recommended.
+    //Otherwise this won't work
+    ~signal.write(Platform.defaultTempDir++"standard_waves.wav", "WAV");
+)
+
+//use make_oscos3_mipmap to create a 3D buffer of variable wavetables from the temporary file
+(
+
+    var path = Platform.defaultTempDir++"standard_waves.wav";
+    
+    OscOS3.make_oscos3_mipmap(s, path, ~fft_size, 3, true, {|buf|~buf3D = buf});
+
+)
+
+//the file is saved here, if it doesn't load properly above
+~buf3D = Buffer.read(s, Platform.defaultTempDir++"oscos3d_temp2.wav");
+
+~buf3D.free
+
+//play the buffer back with no phase buffer, which uses an internal ramp as the lookup
+{OscOS3.ar(~buf3D, -1, 43, 0, 0, 4, MouseX.kr, ~buf3D.numChannels, MouseY.kr, 2, 0, 2).dup*0.2}.scope;
+
+//now get an anti-aliased variable oscillator
+({
+    var mouse = MouseY.kr;
+    var freq = mouse.lincurve(0,1,0.001,SampleRate.ir/2, 4).poll;
+    var chan_loc = freq.abs.curvelin(43,SampleRate.ir/4,0,~buf3D.numChannels, 8).floor.poll;
+    OscOS3.ar(~buf3D, -1, freq, 0, 0, 4, MouseX.kr, ~buf3D.numChannels, chan_loc/~buf3D.numChannels, -1, 0).dup*0.2
+}.scope;
+)
+//load up a saw for the subsequent examples
+
+(
+    ~fft_size = 2048;
+    ~signal = Env([0,1,-1,0],[1,0,1]).asSignal(~fft_size);
+    
+    ~signal.write(Platform.defaultTempDir++"saw_only.wav");
+)
+
+//use make_oscos3_mipmap to create a 3D buffer of variable wavetables from the temporary file
+(
+
+    var path = Platform.defaultTempDir++"saw_only.wav";
+    ~fft_size = 2048;
+    //12 maps per octave!
+    OscOS3.make_oscos3_mipmap(s, path, ~fft_size, 12, true, {|buf|~saw_buf = buf});
+
+)
+
+//the file is saved here, if it doesn't load properly above
+~saw_buf = Buffer.read(s, Platform.defaultTempDir++"oscos3d_temp2.wav");
+
+~saw_buf.plot; //a 133 channel buffer!
+
+//play the buffer back with no phase buffer, which uses an internal ramp as the lookup
+{OscOS3.ar(~saw_buf, -1, 43, 0, 0, 1, 0, ~saw_buf.numChannels, MouseY.kr(0,1), 2, 0, 2).dup*0.1}.scope;
+
+//make an oscillator that adjusts the playback buffer based on the frequency of playback
+//this oscillator has no aliasing!
+({
+    var mouse = MouseY.kr;
+    var freq = mouse.lincurve(0,1,0.001,SampleRate.ir/2, 4).poll;
+    var buf_loc = freq.abs.curvelin(43,SampleRate.ir/2,0,~saw_buf.numChannels, 8).poll;
+
+    OscOS3.ar(~saw_buf, -1, freq, 0, 0, 1, 0, ~saw_buf.numChannels, buf_loc/~saw_buf.numChannels, 2, 0, 2).dup*0.1;
+}.scope;
+)
+
+//frequency modulation works great - no foldover!
+({
+    var mouse = MouseY.kr;
+    var freq = mouse.lincurve(0,1,0.001,2000, 4)+(SawOS.ar(MouseX.kr(20,2000), 0, 2)*2000);
+    var buf_loc = freq.abs.curvelin(43,SampleRate.ir/2,0,~saw_buf.numChannels, 8).poll;
+    var sig = OscOS3.ar(~saw_buf, -1, freq, 0, 0, 1, 0, ~saw_buf.numChannels, buf_loc/~saw_buf.numChannels, 2, 0, 4).dup*0.1;
+    LeakDC.ar(sig)
+}.scope;
+)
+
+//crossfeedback modulation sounds pretty great
+({
+    var sig, freq, buf_loc, mouse = MouseY.kr;
+
+    var feedback = LocalIn.ar(1);
+
+    freq = mouse.lincurve(0,1,0.001,4000, 4)+(SawOS.ar(MouseX.kr(20,2000)+(feedback*1000), 0,3)*2000);
+    buf_loc = freq.abs.curvelin(43,SampleRate.ir/2,0,~saw_buf.numChannels, 8).poll;
+    sig = OscOS3.ar(~saw_buf, -1, freq, 0, 0, 1, 0, ~saw_buf.numChannels, buf_loc/~saw_buf.numChannels, 2, 0, 4);
+
+    LocalOut.ar(sig);
+
+    LeakDC.ar(sig).dup*0.1
+
+}.scope;
+)
+
+
+//a polyphonic keyboard
+(
+    var notes = List.newClear(128);
+
+    MIDIClient.init;
+    MIDIIn.connectAll;
+
+    MIDIFunc.noteOn({|val, num|
+        notes[num] = {|gate = 1|
+            var freq = num.midicps;
+            var buf_loc = freq.abs.explin(43,SampleRate.ir/2,0,~saw_buf.numChannels, 8);
+            var env = Env.asr.kr(2, gate);
+
+            OscOS3.ar(~saw_buf, -1, freq, 0, 0, 1, 0, ~saw_buf.numChannels, buf_loc/~saw_buf.numChannels, 2, 0, 2).dup*0.1*env;
+        }.play;
+    });
+
+    MIDIFunc.noteOff({|val, num|
+        notes[num].set(\gate, 0)
+    });
+
+)
+
+
+//or some just intonation
+(
+{
+    var root = 33.midicps;
+    var freqs = [root, root*5, root*7, root*3];
+    var buf_locs = freqs.abs.explin(43,SampleRate.ir/2,0,~saw_buf.numChannels, 8);
+    Splay.ar(OscOS3.ar(~saw_buf, -1, freqs, 0, 0, 1, 0, ~saw_buf.numChannels, buf_locs/~saw_buf.numChannels, 2, 0, 2))*0.1
+}.play
+)
+
+
+//lets reload our standard waves buffer
+(
+
+    var path = Platform.defaultTempDir++"standard_waves.wav";
+    
+    OscOS3.make_oscos3_mipmap(s, path, ~fft_size, 3, false, {|buf|~buf3D = buf});
+
+)
+
+~buf3D = Buffer.read(s, Platform.defaultTempDir++"oscos3d_temp2.wav");
+
+(
+    {
+        var root = 33.midicps;
+        var freqs = [root, root*5, root*7, root*3];
+        var buf_locs = freqs.abs.explin(43,SampleRate.ir/2,0,~buf3D.numChannels, 8);
+        var sig = Splay.ar(OscOS3.ar(~buf3D, -1, freqs, 0, 0, 4, LFTri.ar(0.1).range(0.25,1), ~buf3D.numChannels, buf_locs/~buf3D.numChannels, 2, 0, 2))*0.1;
+        HPF.ar(sig, root)
+    }.scope
+)
+
+//continuing with the standard waves buffer
+
+//create a wavetable that provides a variable phase lookup shape
+(
+    ~shape = Env([-1,-0.875, 0.875, 1],[4,1,4]).asSignal(2048)
+        .addAll(Env([-1,1],[1]).asSignal(2048))
+        .addAll(Env([-1,-0.125, 0.125, 1],[1,8,1]).asSignal(2048))
+        .flatten;
+        ~phase_buf = Buffer.loadCollection(s, ~shape*0.5+0.5);
+)
+~phase_buf.plot;
+
+
+//MouseY controls the shape of the phase buffer that looks into the buffer
+//gets some wild shapes
+{OscOS3.ar(~buf3D, ~phase_buf, 100, 0, 0, 4, MouseX.kr, ~buf3D.numChannels, 0, 3, MouseY.kr, 2).dup*0.1}.scope
+
+//we can also sync our oscillator to any trigger or oscillator (anything that crosses from non-positive to positive)
+
+(
+{
+    var trig = LFTri.ar(MouseY.kr(50,300))*0.1;
+    var sig = OscOS3.ar(~buf3D, ~phase_buf, 100, 0, trig, 4, MouseX.kr, ~buf3D.numChannels, 0, 3, SinOsc.ar(0.1).range(0,1), 2)*0.1;
+    [trig, sig]
+}.scope
+)
+
+//load any commercial wavetable and make it ready for OscOS3
+
+(
+
+    //you need to load your own wavetable
+    var path = "/Users/spluta1/Music/Vital/Glorkglunk/Wavetables/Solar Powered.wav";
+    ~fft_size = 2048;
+    OscOS3.make_oscos3_mipmap(s, path, ~fft_size, 3, false, {|buf|~commercial_buf = buf});
+
+)
+
+~commercial_buf = Buffer.read(s, Platform.defaultTempDir++"oscos3d_temp2.wav");
+
+//play the buffer back with no phase buffer, which uses an internal ramp as the lookup
+(
+    {
+        var mouse = MouseY.kr;
+        var freq = mouse.lincurve(0,1,0.001,4000, 4).poll;
+        var buf_loc = freq.abs.curvelin(43,SampleRate.ir/2,0,~commercial_buf.numChannels, 8);
+        OscOS3.ar(~commercial_buf, -1, freq, 0, 0, 93, MouseX.kr, ~commercial_buf.numChannels, buf_loc/~commercial_buf.numChannels, 2, 0, 2).dup*0.1
+    }.scope;
+)
+
+//we can also use the oversampling to just play back a sound file really fast
+
+(
+    ~path = Platform.resourceDir +/+ "sounds/a11wlk01.wav";
+    ~long_buf = Buffer.read(s, ~path);
+)
+
+(
+    {
+        var mouse = MouseY.kr;
+        var fund = SampleRate.ir/2/BufFrames.kr(~long_buf);
+        var freq = mouse.lincurve(0,1,fund/8,fund*800, 4).poll;
+        OscOS3.ar(~long_buf, -1, freq, 0, 0, 1, 0, 1, 0, 2, 0, 4).dup*0.1
+    }.scope;
+)
+
+::

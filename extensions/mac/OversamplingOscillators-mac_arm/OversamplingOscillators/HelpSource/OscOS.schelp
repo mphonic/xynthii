@@ -1,0 +1,252 @@
+TITLE:: OscOS
+summary:: Oversampled Wavetable Oscillator
+categories:: UGens>Oscillator
+related:: BuchlaFoldOS, ShaperOS, OscOS3
+
+DESCRIPTION::
+A sinc interpolated mipmapped and oversampled wavetable oscillator that also interpolates between adjacent wavetables, thus providing a 3D wavetable oscillator with no aliasing. 
+
+The mipmap function inside the oscillator should significatly anti-alias the output. Oversampling should get rid of any further aliasing.
+
+
+CLASSMETHODS::
+
+METHOD:: ar
+audio rate
+
+ARGUMENT:: bufnum
+The buffer of the wavetable. This ugen always uses a single buffer, but it can interpolated between adjacent tables that reside in a single buffer.
+
+OscSC uses standard buffers, not specially formatted Wavetable buffers like Osc and VOsc.
+
+ARGUMENT:: phase
+Values between 0-1. OscOS does not have its own internal clock. Instead it relies on a phasor lookup.
+
+ARGUMENT:: bufdivs
+The number of separate wavetables in the provided buffer.
+
+ARGUMENT:: bufloc
+Values between 0-1. Points the current wavetable. Values between wavetables will result in a linearly interpolated output between wavetables. The value indicates the location in the buffer array. Divisions are at bufindex/numbufs-1. So, with 4 buffers, the divisions are at 0, 0.333, 0.666, and 1, etc.
+
+ARGUMENT:: oversample
+OverSampling Index
+
+0 = none, 1 = 2x, 2 = 4x, 3 = 8x, 4 = 16x
+
+ARGUMENT:: mul
+amplitude multiplier
+
+ARGUMENT:: add
+value added to the signal
+
+
+
+INSTANCEMETHODS::
+
+
+EXAMPLES::
+
+code::
+//fill a buffer with 4 different waveforms
+(
+    t = Signal.sineFill(4096, [1], [0]);
+    u = Signal.sineFill(4096, 1.0/((1..512)**2)*([1,0,-1,0]!128).flatten);
+    w = Signal.sineFill(4096, 1.0/(1..512)*([1,0]!256).flatten);
+    x = Signal.sineFill(4096, 1.0/(1..512));
+    v = t.addAll(u).addAll(w).addAll(x);
+
+    b = Buffer.loadCollection(s, v);
+)
+//plot the buffer if you like
+x.plot;
+
+(
+    {
+        var phase = Phasor.ar(0,100/SampleRate.ir);
+        var osc = OscOS.ar(b,phase,4,MouseX.kr,0,0.1);
+        osc
+    }.scope
+)
+//open the FreqScope
+FreqScope()
+
+//LFSaw also works
+//further, the mipmap/oversampling combo should provide suitable anti-aliasing at all frequencies
+//an oversample index of 1 should be sufficient in most cases
+(
+    {
+        var freq = MouseY.kr(20,10000);
+        var phase = [Phasor.ar(0,freq/SampleRate.ir),LFSaw.ar(freq,1).range(0,1)];
+        var osc = OscOS.ar(b,phase,4,MouseX.kr,1,0.1);
+        osc
+    }.scope
+)
+
+//without any oversampling, the oscillator will internally use one fewer octave of partials, preventing aliasing, but missing much of the top octave of partials
+(
+    {
+        var freq = MouseY.kr(20,12000);
+        var phase = [Phasor.ar(0,freq/SampleRate.ir),LFSaw.ar(freq,1).range(0,1)];
+        var osc = OscOS.ar(b,phase,4,MouseX.kr,0,0.1);
+        osc
+    }.scope
+)
+
+//some lovely extreme modulation is possible
+
+(
+    {
+        var mod_phase = Phasor.ar(0,MouseX.kr(20, 4000).poll/SampleRate.ir, 0, 1);
+        var mod = OscOS.ar(b,mod_phase,4,MouseX.kr,1,0.5);
+    
+        var phase = Phasor.ar(0,(MouseY.kr(20, 4000)+(mod*2000))/SampleRate.ir, 0, 1);
+    
+        var osc = OscOS.ar(b,phase,4,MouseX.kr,1,0.1);
+        osc.dup
+    }.scope
+)
+
+
+//modulate the buffer location very quickly
+
+(
+    t = Signal.sineFill(1024, [1], [0]);
+    u = Env([0,1,-1,0],[0.25,0.5,0.25]).asSignal(1024);
+    v = t.addAll(u);
+
+    b = Buffer.loadCollection(s, v);
+)
+
+//plot the buffer if you like
+b.plot;
+
+(
+    {
+        var freq = MouseY.kr(20, 800);
+        var phase = LFSaw.ar(freq).range(0,1);
+        var osc = OscOS.ar(b,phase,2,SinOsc.ar(MouseX.kr(1,20)).range(0,1));
+        osc.dup*0.1
+    }.scope
+)
+
+//using a phase input allows for fun wavetable warping
+//(at high frequencies and extreme warping, the internal algorithm will distort)
+(
+    {
+        var phase = LFSaw.ar(100,1);
+        var osc;
+        var midpoint = MouseY.kr(0.1,0.9);
+        phase = Select.ar(phase>0,[
+            phase.bilin(midpoint.neg,-1,0,-0.5,-1,0),
+            phase.bilin(midpoint,0,1,0.5,0,1)
+        ])*0.5+0.5;
+        osc = OscOS.ar(b,phase,2,MouseX.kr,1,0.1);
+        osc.dup
+    }.scope
+)
+
+(
+    {
+        var phase = LFSaw.ar(100,1);
+        var osc;
+        var midpoint = MouseY.kr(0.1,0.9);
+        phase = Select.ar(phase>0,[
+            phase.bilin(midpoint.neg,-1,0,(1-midpoint).neg,-1,0),
+            phase.bilin(midpoint,0,1,1-midpoint,0,1)
+        ])*0.5+0.5;
+        osc = OscOS.ar(b,phase,2,MouseX.kr,1,0.1);
+        osc.dup
+    }.scope
+)
+
+//LFSaw works best for frequency modulation
+(
+    {
+        var fm = SinOsc.ar(100,-0.1,MouseY.kr(0,5000));
+        var phase = LFSaw.ar(50+fm).range(0,1);
+        var osc = OscOS.ar(b,phase,2,SinOsc.ar(0.2).range(0,1),1, 0.1);
+        osc.dup
+    }.scope
+)
+
+
+
+//you can also load samples from commercial wavetable oscillators
+c = Buffer.read(s, "/Users/spluta1/Music/Vital/Glorkglunk/Wavetables/Granular Upgrade.wav")
+
+(
+    {
+        var phase = LFSaw.ar(53.midicps/4).range(0,1);
+        var osc = OscOS.ar(c,phase,108,MouseX.kr.poll,1);
+        osc.dup*0.2
+    }.scope
+)
+
+//wavetables should have no issues with aliasing
+//there is some low end distortion which can be removed with a LPF
+(
+    {
+        var freq = MouseY.kr(43.65,4000);
+        var phase = LFSaw.ar(freq).range(0,1);
+        var osc = OscOS.ar(c,phase,108,MouseX.kr,1);
+        osc = HPF.ar(osc, freq.clip(20, 20000));
+        osc.dup*0.2
+    }.scope
+)
+
+
+//Using OscOS to send longer soundfiles into the stratophere
+//distortion does occur in large waveforms in the low register (the sinc used is not large enough to compensate for the large buffer size), so switch to BufRead in the bottom octaves
+p = Platform.resourceDir +/+ "sounds/a11wlk01.wav";
+b = Buffer.read(s, p);
+(
+    {
+	var fund_of_buf = 1/BufDur.kr(b);
+        var freq = MouseY.kr(fund_of_buf/8,fund_of_buf*(2**10.5), 1);
+        var phase = LFSaw.ar(freq).range(0,1);
+        
+        var osc = OscOS.ar(b,phase,1,MouseX.kr,0);
+        var br = BufRd.ar(1, b, phase*BufFrames.kr(b), 1, 4);
+
+        //will crossfade with 
+        var cross = LinXFade2.ar(br, osc, (freq.abs-1).clip(0,400).linlin(0,8,-1,1).poll);
+
+        cross = HPF.ar(cross, 20);
+        
+        cross.dup*0.2
+    }.scope
+)
+
+(
+    w = Signal.sineFill(4096, 1.0/(1..512)*([1,0]!256).flatten);
+~square_wave = Buffer.loadCollection(s, w);
+
+SynthDef("square", {|freq=43, gate = 1|
+    var phase = LFSaw.ar(freq).range(0,1);
+    var env = Env.asr.kr(2, gate);
+
+    var out = OscOS.ar(~square_wave, phase,  oversample:1);
+    Out.ar(0, out.dup*env*0.05)
+}).load(s)
+)
+
+
+//a polyphonic keyboard
+(
+    var notes = List.newClear(128);
+
+    MIDIClient.init;
+    MIDIIn.connectAll;
+
+    MIDIFunc.noteOn({|val, num|
+        notes[num] = Synth("square", [\freq, num.midicps]);
+    });
+
+    MIDIFunc.noteOff({|val, num|
+        notes[num].set(\gate, 0)
+    });
+
+)
+
+
+::

@@ -1,0 +1,189 @@
+CLASS:: AY
+SUMMARY:: Emulator of the AY (aka YM) soundchip, used in Spectrum/Atari
+CATEGORIES:: UGens>Generators
+
+DESCRIPTION::
+
+Emulates the General Instrument AY-3-8910 (a.k.a. the Yamaha YM2149) 3-voice sound chip, as found in the strong::ZX Spectrum 128::, the strong::Atari ST::, and various other home computers during the 1980s.
+
+NOTE::
+The chip's inputs are integer values, so non-integer values will be rounded off.
+::
+
+The emulation is provided by the libayemu library: http://sourceforge.net/projects/libayemu - I have merely wrapped it up as a SC UGen.
+
+SUBSECTION:: Oscillator behavior
+
+Typically, we think of oscillators as vibrating around zero (balanced output, with no DC offset).
+
+The AY chip has three pulse oscillators and one noise oscillator (which may be multiplied in with the other oscillators' signals). They vibrate as follows (note that their sum is scaled down to valid floating-point signal range):
+
+table::
+## strong::Oscillator:: || Low value || High value
+## A || 0 || 4
+## B || 0 || 2
+## C || 0 || 1
+::
+
+note:: There is always DC offset with this UGen. It's strongly recommended to use link::Classes/LeakDC:: on AY's output. ::
+
+The code::control:: input controls whether the oscillator will be used or not, and whether the pulse wave will be multiplied by noise or not.
+
+If code::control:: disables an oscillator, it produces its nonzero value as DC. This way, the three oscillators working together can access all 8 possible states resulting from three bits.
+
+list::
+## A alone oscillates between 3 and 7 (because B and C's nonzero values add up to 3).
+## B alone oscillates between 5 and 7 (because A and C's nonzero values add up to 5).
+## C alone oscillates between 6 and 7 (because A and B's nonzero values add up to 6).
+::
+
+This means oscillator B will be perceived to be quieter than A, and C quieter than B.
+
+This characteristic can be used to simulate wave shapes. For example, if A:B:C = fundamental : octave : 2 octaves, mixing the three oscillators at equal volume is close to a sawtooth wave.
+
+CLASSMETHODS::
+
+METHOD::ar
+
+ARGUMENT::tonea
+integer "tone" value for the first of the three voices, from strong::0 to 4095:: (i.e. 12-bit range). Higher value = lower pitch. For convenience, the link::#*freqtotone:: method converts a frequency value to something appropriate for the tone input.
+
+ARGUMENT::toneb
+integer "tone" value for the second of the three voices. See description of strong::tonea::.
+
+ARGUMENT::tonec
+integer "tone" value for the third of the three voices. See description of strong::tonea::.
+
+ARGUMENT::noise
+the period of the pseudo-random noise generator, strong::0 to 31::
+
+ARGUMENT::control
+controls how the noise is mixed into the tone(s), strong::0 to 63:: (0 is mute). This is a binary mask value which masks the noise/tone mixture in each channel, so it's not linear.
+
+Six bits are used: code::fedcba:: (with code::a:: being least significant and code::f:: most significant).
+
+list::
+## Bits a and d control oscillator A.
+## Bits b and e control oscillator B.
+## Bits c and f control oscillator C.
+## Bits a, b, and c turn oscillators A, B and C on or off, respectively: 001 = decimal 1 plays oscillator A only, 110 = decimal 6 plays oscillators B and C together. (Turning an oscillator "off" produces its nonzero DC value.)
+## Bits d, e and f multiply A, B and C respectively by noise. When the oscillator is "off" (nonzero), continuous noise is produced. When the oscillator is on, noise will turn on and off periodically according to the oscillator's frequency.
+::
+
+Control value 7 will mix A, B and C's clean tones together. Control value 0 reduces all oscillators to DC.
+
+ARGUMENT::vola
+volume of the first of the three voices, strong::0 to 15:: (or 0 to 31 if using YM chiptype).
+
+ARGUMENT::volb
+volume of the second of the three voices, strong::0 to 15:: (or 0 to 31 if using YM chiptype). Its perceived volume is 1/2 of oscillator A's volume.
+
+ARGUMENT::volc
+volume of the third of the three voices, strong::0 to 15:: (or 0 to 31 if using YM chiptype). Its perceived volume is 1/4 of oscillator A's volume.
+
+ARGUMENT::envfreq
+envelope frequency, strong::0 to 4095::
+
+ARGUMENT::envstyle
+type of envelope used, strong::0 to 15::
+
+ARGUMENT::chiptype
+strong::0:: for AY (default), strong::1:: for YM. The models behave slightly differently. This input cannot be modulated - its value is only handled at the moment the UGen starts.
+
+ARGUMENT::mul
+general multiply controls for the resulting signal
+
+ARGUMENT::add
+general add controls for the resulting signal
+
+METHOD::freqtotone
+converts a frequency value to something appropriate for the strong::tonea::, strong::toneb:: and strong::tonec:: inputs.
+
+EXAMPLES::
+
+CODE::
+s.boot;
+
+// Default...
+x = {AY.ar * 0.1}.play(s);
+x.free;
+
+// Mouse-controlled tones
+(
+x = {
+	Pan2.ar(AY.ar(
+		tonea: 	MouseY.kr(10, 3900, 1),
+		toneb: 	MouseX.kr(10, 3900, 1),
+		control: 	3,
+		vola: 	14,
+		volb: 	14,
+		volc: 	0,
+		mul: 0.1
+	))
+}.play;
+)
+
+x.free;
+
+// A random walk in a ZX Spectrum
+(
+x = {
+	var rate = MouseX.kr(0.1, 10); // You control your wandering speed
+	Pan2.ar(AY.ar(
+		tonea: 	LFDNoise3.kr(rate).range(10, 3900),
+		toneb: 	LFDNoise3.kr(rate).range(10, 3900),
+		tonec: 	LFDNoise3.kr(rate).range(10, 3900),
+		noise: 	LFDNoise3.kr(rate).range(0, 31),
+		control: 	LFDNoise0.kr(rate).range(0, 31),
+		vola: 	LFDNoise3.kr(rate).range(0, 15),
+		volb: 	LFDNoise3.kr(rate).range(0, 15),
+		volc: 	LFDNoise3.kr(rate).range(0, 15),
+		envfreq: 	LFDNoise3.kr(rate).range(0, 4095),
+		envstyle: 	LFDNoise3.kr(rate).range(0, 15),
+		mul: 0.1
+	))
+}.play;
+)
+
+x.free;
+
+// Now to define a synth which can be used in patterns etc
+(
+SynthDef(\ay1, { | freqa=440, freqb=550, freqc=660, vola=15, volb=0, volc=0, chink=1, wobbly=1, pan=0, amp=0.1, gate=1|
+	var ay, chinkenv, wobblyenv;
+
+	//chinkenv = if(chink>0, EnvGen.kr(Env.new([0.06125, 0.06125, 1, 1], [0.05, 0, 0.1], 0, 4, 4)), 1);
+	chinkenv = if(chink>0, EnvGen.kr(Env.new([2, 2, 1, 1], [0.05, 0, 0.1], 0, 4, 4)), 1);
+	wobblyenv = LFPulse.kr(10, 0.5, mul:wobbly).range(0.5, 1);
+
+	# freqa, freqb, freqc = [freqa, freqb, freqc] * [1, wobblyenv, wobblyenv] * chinkenv;
+	ay = AY.ar(AY.freqtotone(freqa), AY.freqtotone(freqb), AY.freqtotone(freqc),
+		0, 3, vola, volb, volc, mul: amp);
+	ay = ay * EnvGen.kr(Env.asr(0.01, 1, 0.05), gate, doneAction:2);
+	Out.ar(0, Pan2.ar(ay, pan));
+}).load(s);
+)
+
+x = Synth(\ay1, [\wobbly, 0, \chink, 1, \tonea, 1000.rand]);
+x.free;
+
+SynthDescLib.read;
+
+// Use the synth in a jerky lo-fi pattern of some sort...
+(
+Pbind(
+	\instrument, \ay1,
+	\freqa,	Pseq((#[55, 55, 57, 58, 57, 55, 58, 50]-12).midicps, inf),
+	\freqb,	Pseq([
+					Pseq( (#[55, 55, 54, 55, 54, 55, 58, 57]+12).midicps, 2),
+					Prand((#[55, 55, 54, 55, 54, 55, 58, 57]+12).midicps, 2)
+				], inf),
+	\dur,	Pseq(#[3, 0.5, 0.5, 1.5, 0.5, 1, 1, 4] * 0.4, inf),
+	\wobbly,	Pstutter(8 * 4, Prand(#[0, 1], inf)),
+	\vola,	15,
+	\volb,	14,
+	\chink,	1,
+	\amp,	0.4
+).play
+)
+::

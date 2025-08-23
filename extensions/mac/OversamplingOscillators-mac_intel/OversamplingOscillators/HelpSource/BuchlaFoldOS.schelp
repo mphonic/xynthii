@@ -1,0 +1,104 @@
+TITLE:: BuchlaFoldOS
+summary:: Oversampled Buchla 259 shaped Wavefolder
+categories:: UGens>Distortion
+related:: SergeFoldOS, ShaperOS, ShaperOS2
+
+DESCRIPTION::
+A wavefolder in the shape of the classic Buchla 259 wavefolder.  Derived from LINK::http://https://www.researchgate.net/publication/337591033_Virtual_Analog_Buchla_259_Wavefolder?enrichId=rgreq-24e9bcbf39508bb5b2598f920279b17c-XXX&enrichSource=Y292ZXJQYWdlOzMzNzU5MTAzMztBUzo4MzAwODY2MjY0MzA5NzdAMTU3NDkxOTQ4MjI1OQ%3D%3D&el=1_x_2&_esc=publicationCoverPdf##Virual Analog Buchla 259e Wavefolder ::
+by Esqueda, etc. 
+
+CLASSMETHODS::
+
+METHOD:: ar
+
+ARGUMENT:: sig
+the incoming signal
+
+ARGUMENT:: amp
+amplitude multiplier. This value should be between 0 and 10. Between 0 and 0.6 the signal is simply multiplied. Distortion occurs above 0.6 up to 10. Above 10 the signal will exceed 1.
+
+ARGUMENT:: oversample
+OverSampling Index
+
+0 = none, 1 = 2x, 2 = 4x, 3 = 8x, 4 = 16x
+
+ARGUMENT:: mul
+mul
+
+ARGUMENT:: add
+add
+
+EXAMPLES::
+
+code::
+(
+    {
+        var sig = SinOsc.ar(40);
+        var amp = MouseX.kr(0,20).poll;
+        var out = BuchlaFoldOS.ar(sig, amp, 1);
+        out.dup*0.2
+    }.scope
+)
+
+//in pure sc, this code looks like this (without the oversampling):
+
+(
+    var buchlaCell = {|sig, sign, thresh, sig_mul1, sign_mul, sig_mul2|
+        Select.ar(sig.abs>thresh,[DC.ar(0), sig*sig_mul1-(sign*sign_mul)])*sig_mul2;
+    };
+    {
+        var amp = MouseX.kr(0.001,20);
+        var sig = SinOsc.ar(40)*amp;
+        var sign = sig.sign;
+        var v1 = buchlaCell.(sig, sign, 0.6, 0.8333, 0.5, 12);
+        var v2 = buchlaCell.(sig, sign, 2.994, 0.3768, 1.1281, 27.777);
+        var v3 = buchlaCell.(sig, sign, 5.46, 0.2829, 1.5446, 21.428);
+        var v4 = buchlaCell.(sig, sign, 1.8, 0.5743, 1.0338, 17.647);
+        var v5 = buchlaCell.(sig, sign, 4.08, 0.2673, 1.0907, 36.363);
+        var v6 = sig*5;
+        var out = ((v1+v2+v3*(-1)))+v4+v5+v6;
+        out/5*0.2
+    }.scope
+)
+
+//adding a tanh allows amp values above 10 to be used without clipping, and adds a nice saturation effect
+(
+    {
+        var sig = SinOsc.ar(40);
+        var amp = MouseX.kr(0,20).poll;
+        var out = BuchlaFoldOS.ar(sig, amp, 1);
+        out.tanh.dup*0.2
+    }.scope
+)
+
+//any signal can be used
+(
+    {
+        var sig = SinOscOS.ar(MouseX.kr(20,1000)+
+        (SquareOS.ar(MouseY.kr(20,1000))*300), 0, 4);
+        
+        var amp = MouseX.kr(0,10).poll;
+        var out = BuchlaFoldOS.ar(sig, amp, 4);
+        out = LPF.ar(out, 4000);
+
+        out.tanh.dup*0.2
+    }.scope
+)
+
+(
+    {
+        var sig = VarSawOS.ar(MouseX.kr(20,1000)+
+        (SquareOS.ar(MouseY.kr(20,1000))*300), 0, 0.1, 4);
+        
+        var amp = MouseX.kr(0.6,10).poll;
+        var out = LPF.ar(out, 400);
+        out = BuchlaFoldOS.ar(sig, amp, 4);
+
+        out = LPF.ar(out.tanh, 4000);
+    
+        out.dup*0.2
+    }.scope
+)
+
+::
+

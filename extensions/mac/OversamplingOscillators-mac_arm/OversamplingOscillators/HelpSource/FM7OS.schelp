@@ -1,0 +1,202 @@
+class:: FM7OS
+summary:: Oversampled frequency modulation oscillator matrix.
+categories:: UGens>Oscillator
+related:: SawBL, SquareBL, TriBL, ImpulseBL, SinOscOS, TriOS, SawOS, SquareOS, VarSawOS, PMOscOS, PM7OS, FM7OS
+
+Description::
+FM7OS is not to be confused with the FM7. The PM7OS==FM7 as the equivalent phase modulation matrix. The FM7OS is a FREQUENCY modulation matrix, and the values used in modulation should be reflected as such.
+
+Like the PM7OS, it implements a 6x6 oscillator matrix, however, instead of phase each oscillator's frequency can be modulated by any of the other oscillators' output. This UGen is overly luxurious and not at all efficient as all inputs are audio rate at all times.
+
+One important "feature" is that the feedback value in the modulation matrix - the first mod for the first sine or the second mod for the second sine, etc - will perform PHASE MODULATION on itself. It can also quickly become nonsense, so be careful. This means the PM values 1,1 2,2 etc (the top left to bottom right diagonal), need to be between 0 and 1 ish, not between 100 and 5000 ish.
+
+classmethods::
+
+method::ar
+
+The UGen expects two matrices: one for oscillator parameter control, one for frequency modulation. It outputs six channels, one for each oscillator. To select specific outputs, you can use array methods like code::at(indices):: or code::slice(indices)::.
+
+argument::ctlMatrix
+
+specifies the three parameters strong::frequency:: (can be modulated at control rate), strong::phase:: (set at initialization only) and strong::amplitude::.(control rate):
+
+code::
+// freq, phase, amp
+[ [ 300, 0,    1   ],
+  [ 400, pi/2, 1   ],
+  [ 730, 0,    0.5 ],
+  [ 0,   0,    0   ],
+  [ 0,   0,    0   ],
+  [ 0,   0,    0   ] ]
+::
+
+argument::modMatrix
+
+The modulation matrix specifies the amount of modulation each oscillator
+output has on another oscillator's frequency. Row i in the matrix refer to
+oscillator i's frequency input and the columns denote the amount of frequency
+modulation in radians.
+
+A BIG THING: the mod number refering to the oscillator's feedback on itself - so the first mod for the first sine or the second mod for the second sine, etc - will perform PHASE MODULATION on itself. FM is meaningless, but PM will change the shape of the wave. It can also quickly become nonsense, so be careful. This means the PM values 1,1 2,2 etc, need to be between 0 and 1 ish, not between 100 and 5000 ish.
+
+code::
+//classic basic FM
+(
+{
+    var ctls, mods, chans;
+    ctls = [
+        // freq, phase, amp
+        [400, 0, 1],
+        [300, 0, 1],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0]
+    ];
+    mods = [
+        [0, MouseX.kr(0,2000), 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0]
+    ];
+    chans = [0,0];
+    FM7OS.ar(ctls, mods*2, 1).slice(chans) * 0.3;
+}.scope;
+)
+
+//probably a terrible design decision, but I can't help myself. the feedback modulator uses PM, not FM, so numbers there should be between 0 and 1
+(
+{
+    var ctls, mods, chans;
+    ctls = [
+        // freq, phase, amp
+        [200, 0, 1],
+        [200, 0, 1],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0]
+    ];
+    mods = [
+        [MouseX.kr(0,1).poll, 0, 0, 0, 0, 0],
+        [0, MouseX.kr(0,1).poll, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0]
+    ];
+    chans = [0,1];
+    FM7OS.ar(ctls, mods*2, 1).slice(chans) * 0.3;
+}.scope;
+)
+
+//a little combi of FM and PM
+(
+{
+    var ctls, mods, chans;
+    ctls = [
+        // freq, phase, amp
+        [400, 0, 1],
+        [300, 0, 1],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0]
+    ];
+    mods = [
+        [MouseY.kr(0,0.5), MouseX.kr(0,2000), 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0]
+    ];
+    chans = [0,0];
+    FM7OS.ar(ctls, mods*2, 1).slice(chans) * 0.3;
+}.scope;
+)
+::
+
+section::Examples
+
+code::
+
+//sine wave 1 modulated by sine wave 2 which is modulated by sine wave 3
+(
+{
+    var ctls, mods, chans;
+    ctls = [
+        // freq, phase, amp
+        [400, 0, 1],
+        [300, 0, 1],
+        [300*3/4, 0, 1],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0]
+    ];
+    mods = [
+        [0, MouseX.kr(0,2000), 0, 0, 0, 0],
+        [0, 0, MouseY.kr(0,2000), 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0]
+    ];
+    chans = [0,0];
+    FM7OS.ar(ctls, mods*2, 1).slice(chans) * 0.3;
+}.scope;
+)
+
+//and of course, things can get way out
+(
+{
+    var ctls, mods, chans;
+    ctls = [
+        // freq, phase, amp
+        [MouseX.kr(2, 1000), 0, 1],
+        [MouseY.kr(2, 1000), 0, 1],
+        [2140, 0, 1],
+        [300, 0, 1],
+        [10, 0, 1],
+        [2, 0, 1]
+    ];
+    mods = [
+        [0.05, 4500, 400, 100, 0, 1000],
+        [LFNoise2.ar(0.3).range(0,2000), 0, 0, LFPulse.ar(MouseX.kr(1,50)).range(0,1)*300, 0, 0],
+        [SinOsc.ar(1,0,0.5,1), 0, 0, 0, 0, 0],
+        [WhiteNoise.ar(1000), 0, (TRand.ar(0,1000,Dust.kr(5))), 0, 150, 0],
+        [(TRand.ar(0,1000,Dust.kr(5)))*LFPulse.ar(MouseY.kr(1,10)), 0, 0, 0, 0, 0],
+        [0, 100, 0, 0, 0, 0]
+    ];
+    chans = [0,1];
+    FM7OS.ar(ctls, mods*2, 4).slice(chans) * 0.3;
+}.scope;
+)
+
+(
+{
+    var ctls, mods, chans;
+    ctls = [
+        // freq, phase, amp
+        [MouseX.kr(2, 1000), 0, 1],
+        [MouseY.kr(2, 1000), 0, 1],
+        [2140, 0, 1],
+        [300+SinOsc.ar(301,0,1000), 0, 1],
+        [10, 0, 1],
+        [2, 0, 1]
+    ];
+    mods = [
+        [0, 4500, 400, 100, 0, 1000],
+        [LFNoise2.ar(0.3).range(0,2000), 0, 0, LFPulse.ar(MouseX.kr(1,50)).range(0,1)*300, 0, 0],
+        [SinOsc.ar(1,0,0.5,1), 0, 0, 0, 0, 0],
+        [0, 0, (TRand.ar(0,1000,Dust.kr(5))), 0, 150, 0],
+        [(TRand.ar(0,1000,Dust.kr(5)))*LFPulse.ar(MouseY.kr(1,10)), 0, 0, 0, 0, 0],
+        [0, 100, 0, 0, 0, 0]
+    ];
+    chans = [0,1];
+    FM7OS.ar(ctls, mods*2, 1).slice(chans) * 0.3;
+}.scope;
+)
+::

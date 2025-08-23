@@ -1,0 +1,75 @@
+TITLE:: PMOscOS
+summary:: Oversampled Phase Modulation Oscillator Pair
+categories:: UGens>Oscillator
+related:: SawBL, SquareBL, TriBL, ImpulseBL, SinOscOS, TriOS, SawOS, SquareOS, VarSawOS, PMOscOS, PM7OS, FM7OS
+
+DESCRIPTION::
+An oversampled Phase Modulation Oscillator Pair using Jatin Chowdhurry's oversampling library from ChowDSP. Expands upon the PMOsc by allowing phase modulation of the modulating oscillator.
+
+
+CLASSMETHODS::
+
+(carFreq, modFreq, pmMul, pmModPhase, oversample, mul, add)
+
+METHOD:: ar
+
+ARGUMENT:: carFreq
+frequency of the carrier oscillator - FM is possible
+
+ARGUMENT:: modFreq
+frequency of the modulating oscillator - FM is possible
+
+ARGUMENT:: pmMul
+values are between 0 and 1
+pmMul - PM is possible
+
+ARGUMENT:: pmModPhase
+phase of the modulating oscillator if you want to modulate the modulator's phase
+
+ARGUMENT:: oversample
+OverSampling Index
+
+0 = none, 1 = 2x, 2 = 4x, 3 = 8x, 4 = 16x
+
+ARGUMENT:: mul
+mul
+
+ARGUMENT:: add
+add
+
+
+EXAMPLES::
+
+code::
+{PMOscOS.ar(MouseX.kr(-1000,10000), 1000, 6, 0, 1, 0.1).dup}.scope; //nice
+
+{PMOscOS.ar(MouseX.kr(-1000,10000), 1000, 6, 0, 4, 0.1).dup}.scope; //better
+
+//phase is 0-2 rather than 0-2pi in PMOsc, so these should be equal
+{PMOscOS.ar(400, 200, 6, 0, 1, 0.1).dup}.scope;
+{PMOsc.ar(400, 200, 6pi, 0, 0.1).dup}.scope;
+
+//the modulator can have an audio rate phase modulator of its own
+{PMOscOS.ar(MouseX.kr(-1000,10000), 1000, 6, LFTri.ar(500), 4, 0.1).dup}.scope; //nice
+
+{SinOscOS.ar(200, SinOsc.ar(400)*Line.ar(0,2,10), 1, 0.1).dup}.scope;
+//should be the same as:
+{PMOscOS.ar(200, 400, Line.ar(0,2,10), 0, 1, 0.1).dup}.scope;
+
+
+//Extreme Modulation is possible.
+
+({
+	var locIn=LocalIn.ar(1);
+	var feedbackMul = 5000;
+	var mod = feedbackMul*VarSaw.ar((MouseY.kr(0, 8000)+(locIn*2000)));
+
+	var car = PMOscOS.ar(
+		(MouseX.kr(1, 8000)
+			+(mod)), LFNoise0.ar(100).range(1,500), 3, 0,4
+
+	);
+	LocalOut.ar(car);
+	car.dup*0.2
+}.scope)
+::

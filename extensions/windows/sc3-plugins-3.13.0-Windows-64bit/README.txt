@@ -1,0 +1,24 @@
+------------------------------------------------------------------------
+Supercollider 3.13.0 Plugins for Windows
+------------------------------------------------------------------------
+
+Before installation, please uninstall any previous version of the
+plugins from your system.
+
+To install the plugins, place the SC3plugins folder into one of the
+SuperCollider extension folders listed below, depending on your
+operating system and installation type:
+
+Default installation in userExtensionsDir:
+    C:\Users\<USERNAME>\AppData\Local\SuperCollider\Extensions
+
+System-wide installation:
+    C:\ProgramData\SuperCollider\Extensions
+
+You can verify these locations by executing the corresponding command
+from within SuperCollider.
+
+*Note* for 32-bit version with supernova plugins: the bundle is split into two
+folders, `plugins` (containing the binary plugins) and `SC3plugins` (
+containing class-, help- and other files). This separation is required by
+supernova. Just move both folders into any of the Extensions directories.
