@@ -15,7 +15,7 @@ This is a one-person operation. Please enjoy the fruits of open source software 
 
 This software needs to be run in [Supercollider](https://supercollider.github.io/downloads.html), which is free. You don't need to know anything about Supercollider to use xynthii, but if you know Supercollider, you can use it to incorporate and control xynthii in a vast array of situations.
 
-Note: If you have a Mac with an ARM processor (M1/2/etc), no matter which step you follow below, you will have to do an extra step to install PortedPlugins. See [PortedPlugins on ARM Architecture](#ported-plugins-on-arm-architecture) below.
+Note: If you have a Mac with an ARM processor (M1/2/etc), no matter which step you follow below, you will have to do an extra step to install PortedPlugins. See [PortedPlugins on ARM Architecture](#portedplugins-on-arm-architecture) below.
 
 Xynthii uses three extension packages. If you are a beginner and are running OSX or Windows on a relatively modern machine, you can install these using the "easy" method:
 
