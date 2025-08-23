@@ -153,6 +153,14 @@ The Synthi A had a joystick that could be routed in the matrix. Here, we have an
 
 The modulation in the mod pod is "linear", which means in practice that it modulates further "down" than "up". For example, if you set `XY x` to modulate O1 frequency at full strength, center will be no modulation, fully to the right will double the frequency, and fully to the left will bring the frequency to near zero. So, moving to the left has a more drastic effect than moving to the right. Careful setting of parameters and modulation strength will make these types of controls feel more intuitive.
 
+## Spectral Tracking
+
+Both of the input modules (IN1, IN2) have envelope followers that can be used in the mod pod (`IN1 env`). Their levels are independent of the modules' amp setting. 
+
+But we can track a whole lot more than just the amplitude envelope. The `spectral-tracking.scd` file is an example of using a number of different properties of the input sound to modulate different synth parameters. Load the `trackme` preset, run the block of code with `~tracker`, and make some noise through whatever the first channel is on your audio interface, and you'll have a slew of expressive possibilities. And you can always change the xynthii settings or modify the `~tracker` synth to get different results. When you're done tracking, make sure to run the line `~tracker.free`.
+
+This same file also includes an example of adding an effect to the entire xynthii output. This one is pretty wild. It uses Concatenative Synthesis to merge xynthii's output with your input signal. Just run the block of code with `~concat` and experiment. To stop concatenating, run `~concat.free`.
+
 ## Bypassing Modules
 
 For modules that make sound (as opposed to modules like envelopes), you can double-click on the module to bypass it. This will silence modules like oscillators, and it will cause a signal to pass unaffected through effects like reverb and delay. Double-click again to unbypass. Individual modulations in the mod pod can also be bypassed in this way.
