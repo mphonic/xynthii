@@ -1,0 +1,71 @@
+class:: Chen
+summary:: Chen's chaotic double scroll attractor
+RELATED::HelpSource/Overview/PortedPlugins
+categories:: UGens>Generators>Chaotic
+
+description::
+
+An implementation of Chen's double scroll chaotic attractor, largely based on link::https://github.com/qiemem/eurorack/tree/v1.1.0/stages##Bryan Head's code for the alternative firmware for the Mutable Instruments Stages:: but heavily modified and tuned to make it as open as possible to SuperCollider users to explore parameter spaces of the algorithm within safe limits and adding interpolation to the parameters to make them modulatable.
+
+This attractor algorithm was proposed by Guanrong Chen link::https://www.worldscientific.com/doi/abs/10.1142/S0218127499001024##in 1999.::
+
+classmethods::
+
+method::ar, kr
+
+returns three values: x, y, z (see examples below).
+
+argument::speed
+Sets the speed of the chaos generator. This is a normalized value between 0.0 and 1.0.
+This parameter may be modulated at control rate;
+
+argument::a
+A value between 0.0 and 1.0 that sets the a parameter of the algorithm. This is scaled to a nice value in the actual algorithm.
+This parameter may be modulated at control rate;
+
+argument::b
+A value between 0.0 and 1.0 that sets the a parameter of the algorithm. This is scaled to a nice value in the actual algorithm.
+This parameter may be modulated at control rate;
+
+argument::c
+A value between 0.0 and 1.0 that sets the a parameter of the algorithm. This is scaled to a nice value in the actual algorithm.
+This parameter may be modulated at control rate;
+
+examples::
+
+code::
+(
+Ndef(\modulated_chen, {|amp=0.5|
+	var chenspeedMax = 0.01;
+	var chen = Chen.ar(LFCub.kr(0.1).range(0.001,chenspeedMax)); 
+	var minfreq = 20.0, maxfreq=2500.0;
+	var sig = SinOsc.ar(chen.linexp(0.0,1.0,minfreq,maxfreq));
+
+	// Chen returns an array of values sot the ugen above is multi channel expanded
+	amp * Splay.ar(sig, spread: chen[0]);
+}).play
+)
+
+// See it on a scope
+(
+Ndef(\scoped, {
+	var x, y, z;
+	#x,y,z = Chen.ar(0.000092);
+
+	[x,y,z]
+}).scope;
+)
+
+(
+Ndef(\torn, {|amp=0.5|
+	var chenspeedMax = 0.009;
+	var chen = Chen.ar(LFCub.kr(LFNoise2.kr(chenspeedMax * 2) * 0.1).range(0.001,chenspeedMax), 0.192, LFCub.kr(0.35).unipolar, 0.22); 
+	var minfreq = 40.0, maxfreq=500.0;
+	var sig = VarSaw.ar(chen.linexp(0.0,1.0,minfreq,maxfreq), width: chen.reverse.lag);
+	sig = sig + FreqShift.ar(sig, chen.scramble.lag3 * 1.0) * 0.5;
+
+	// Chen returns an array of values sot the ugen above is multi channel expanded
+	amp * Splay.ar(sig, spread: chen.sum / 4.0);
+}).play
+)
+::

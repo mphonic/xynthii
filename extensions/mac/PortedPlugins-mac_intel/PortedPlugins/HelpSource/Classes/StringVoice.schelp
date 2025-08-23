@@ -1,0 +1,84 @@
+CLASS:: StringVoice
+SUMMARY:: Extended Karplus-Strong
+RELATED::HelpSource/Overview/PortedPlugins
+CATEGORIES::UGens>PhysicalModelling
+
+DESCRIPTION::
+
+Extended Karplus-Strong.
+
+Original code by E. Gillet. Revisted by Ben Sergentanis for the LINK::https://github.com/electro-smith/DaisySP##DaisySP DSP library::. Ported to SuperCollider by Mads Kjeldgaard.
+
+CLASSMETHODS::
+
+METHOD::ar
+
+ARGUMENT::trig
+Trigger the voice
+
+ARGUMENT::infsustain
+continually excite the string with noise.
+1 is true, 0 is false.
+
+ARGUMENT::freq
+Set the string root frequency in hz
+
+ARGUMENT::accent
+Hit the string harder, influences brightness and decay. 0 to 1.0.
+ 
+ARGUMENT::structure
+Change the nonlinearity (type of string). 0 to 1.0 (with 0 to 0.25 being curved bridge, anything above is dispersion).
+ 
+ARGUMENT::brightness
+Brightness and noise density of the string. 0 to 1.0.
+
+ARGUMENT::damping
+How long it takes for the string to decay relative to the accent level. Full damp is only achieved with full accent. 0.0 to 1.0.
+
+EXAMPLES::
+
+code::
+(
+Ndef(\string, {|pan=0, freq=100|
+	var trig = Dust2.kr(7);
+	var sig = StringVoice.ar(
+		trig, 
+		infsustain: 0,
+		freq:freq, 
+		accent: TRand.kr(0.0,1.0, trig), 
+		structure: TRand.kr(0.0,1.0, trig), 
+		brightness: TRand.kr(0.0,0.5, trig), 
+		damping: TRand.kr(0.1,0.5, trig), 
+	);
+
+	Pan2.ar(sig, pan)
+
+}).play;
+)
+
+(
+SynthDef(\string, {|out=0, pan=0, dur = 1, sustain=0, trig=1, amp=0.5, freq=100, accent=0.5, brightness=0.5, damping=0.5| 
+	var env = Env.perc.kr(gate: trig, timeScale:dur+sustain, doneAction: 2);
+	var sig = StringVoice.ar(trig, infsustain: 1, freq: freq, accent: accent, brightness: brightness, damping: damping);
+
+	sig = Pan2.ar(sig, pan);
+	Out.ar(out, env*sig * amp)
+}).add;
+)
+(
+Pdef('🍇', 
+	Pbind(
+		\instrument, \string,
+		\out, 0.0,
+		\pan, Pwhite(-1.0,1.0),
+		\dur, Pseg([1,5], 16, \lin, inf ) * 0.125,
+		\sustain, Pwhite(0,0.25) * Pkey(\dur),
+		\degree, Pstutter(3, Pwhite(0,7)),
+		\octave, Pwhite(3,5),
+		\accent, Pwhite(0.25,0.5),
+		\brightness, Pwhite(0,0.25),
+		\damping, Pwhite(0.25, 0.75),
+	)
+).play
+)
+::

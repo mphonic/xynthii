@@ -97,17 +97,11 @@ Platform.case(
 			}, {
 				("PortedPlugins".matchRegexp(name)).if({
 					name = "PortedPlugins";
-					path = path ++ "/install/" ++ name;
+					path = path ++ "/" ++ name;
 				});
 			});
 			dest = ext ++ "/" ++ name;
-			("_arm".matchRegexp(arc.asString)
-				.and("PortedPlugins".matchRegexp(name))
-			).if({
-				"****PortedPlugins does not have an arm architecture build. You can install it by installing the Plugins quark -- Quarks.install(\"https://github.com/madskjeldgaard/plugins.quark\") -- restarting Supercollider, and then running Plugins.installPlugin(\"portedplugins\")".postln;
-			}, {
-				("cp -r '" ++ path ++ "' '" ++ ext ++ "/'").unixCmd;
-			});
+			("cp -r '" ++ path ++ "' '" ++ ext ++ "/'").unixCmd;
 			dest;
 		})
 		.collect({|path|

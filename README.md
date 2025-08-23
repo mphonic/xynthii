@@ -15,15 +15,13 @@ This is a one-person operation. Please enjoy the fruits of open source software 
 
 This software needs to be run in [Supercollider](https://supercollider.github.io/downloads.html), which is free. You don't need to know anything about Supercollider to use xynthii, but if you know Supercollider, you can use it to incorporate and control xynthii in a vast array of situations.
 
-Note: If you have a Mac with an ARM processor (M1/2/etc), no matter which step you follow below, you will have to do an extra step to install PortedPlugins. See [PortedPlugins on ARM Architecture](#portedplugins-on-arm-architecture) below.
-
 Xynthii uses three extension packages. If you are a beginner and are running OSX or Windows on a relatively modern machine, you can install these using the "easy" method:
 
 Open Supercollider and, within Supercollider, open `init.scd` from this package. Run the code in `init.scd` (instructions are in the file). This should install extensions in the proper location. Quit and reopen Supercollider, and you should be good to go. You can double-check by opening `test-install.scd` and running the code there.
 
 If you get errors using the above method or you use Linux or are simply a more seasoned Supercollider user, you can install the extensions manually. It is a simple process that just requires downloading some files and moving them to the appropriate folder:
 
-Download [sc3-plugins](https://github.com/supercollider/sc3-plugins/releases), [OversamplingOscillators](https://github.com/spluta/OversamplingOscillators/releases/tag/0.3.3), and [Ported Plugins](https://github.com/madskjeldgaard/portedplugins/releases/tag/v0.4.1). These are all zip files, so make sure to unzip them after download. 
+Download [sc3-plugins](https://github.com/supercollider/sc3-plugins/releases), [OversamplingOscillators](https://github.com/spluta/OversamplingOscillators/releases/tag/0.3.3), and [Ported Plugins - All platforms except Macs with ARM chips (M1/2/etc.)](https://github.com/madskjeldgaard/portedplugins/releases/tag/v0.4.1) or [Ported Plugins for Macs with ARM Chips](https://drive.google.com/file/d/12H8EzGksCxIqhgD4ljVHnsHQxanufB7j/view). These are all zip files, so make sure to unzip them after download. 
 
 There are instructions in the sc3-plugins README that explain how to install. The process is the same for each extension:
 
@@ -32,6 +30,8 @@ There are instructions in the sc3-plugins README that explain how to install. Th
 3. Close and reopen Supercollider. You should be good to go. You can test by opening `test-install.scd` and running the code.
 
 If you are using OSX and your system is attempting to quarantine the extensions, try running the code in `unquarantine-mac-extensions.scd`. If your extensions are still quarantined, see the section at the bottom of this document, [Mac Users and Quarantine](#mac-users-and-quarantine).
+
+Finally, if you're a Mac user and are having issues with PortedPlugins, see [PortedPlugins on ARM Architecture](#portedplugins-on-arm-architecture) below. It is possible to modify xynthii to run without them.
 
 ## Important Supercollider Key Commands
 
@@ -165,7 +165,7 @@ Marcin Paczkowski has written a [script to do this](https://scsynth.org/t/buildi
 
 ## PortedPlugins on ARM Architecture
 
-There is not currently a prebuilt package of PortedPlugins for the ARM architecture. If you are not up to building these from source or are stuck having issues, you can change some code in the xynthii package so that you don't need PortedPlugins:
+If you are having issues with PortedPlugins and are not up to building them from source, you can change some code in the xynthii package so that you don't need PortedPlugins:
 
 Open `modules/xfilt.scd`. Near the beginning, there are SynthDefs, and the first two are commented out. Uncomment those and comment out the other two. So, the code in that section should go from this:
 
