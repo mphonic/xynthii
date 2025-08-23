@@ -29,7 +29,7 @@ There are instructions in the sc3-plugins README that explain how to install. Th
 2. Drag the unzipped folders into your Extensions folder. Some extensions may have different folders for different architectures, like one for 32-bit systems vs 64-bit. Choose the one that is appropriate for your system.
 3. Close and reopen Supercollider. You should be good to go. You can test by opening `test-install.scd` and running the code.
 
-If you are using OSX and your system is attempting to quarantine the extensions, see the section at the bottom of this document, [Mac Users and Quarantine](#mac-users-and-quarantine). The `init.scd` script attempts to avoid this.
+If you are using OSX and your system is attempting to quarantine the extensions, see the section at the bottom of this document, [Mac Users and Quarantine](#mac-users-and-quarantine). The `init.scd` script attempts to avoid this, and there is a separate file that should unquarantine all of your extensions if you installed them manually, `unquarantine-mac-extensions.scd`.
 
 ## Important Supercollider Key Commands
 
@@ -157,6 +157,6 @@ For modules that make sound (as opposed to modules like envelopes), you can doub
 
 ## Mac Users and Quarantine
 
-It's possible that OSX will complain about the extensions and try to quarantine them. The `init.scd` script attempts to avoid this; however, if your extensions are quarantined, you can unquarantine them by opening the terminal and running `xattr -c <the_extensions_folders_with_scx_files_in_them>/*.scx`. You'll need to run this for each extension. Use `Platform.userExtensionDir.openOS` as above to find the main extensions folder, then go into each extension folder and find the folder that has files that end in `.scx`. To get the whole `<the_extensions_folder_with_scx_files_in_them>`, select the folder you just found and hit option-command-c. This should copy the path, which you can then paste into the above command; i.e., `xattr -c /Users/me/Library/Application Support/SuperCollider/Extensions/SC3plugins/*.scx`. 
+It's possible that OSX will complain about the extensions and try to quarantine them. The `init.scd` script attempts to avoid this, and there is an additional file you can run separately called `unquarantine-mac-extensions.scd`. If your extensions are still quarantined after these steps, you can unquarantine them by opening the terminal and running `xattr -c <the_extensions_folders_with_scx_files_in_them>/*.scx`. You'll need to run this for each extension. Use `Platform.userExtensionDir.openOS` as above to find the main extensions folder, then go into each extension folder and find the folder that has files that end in `.scx`. To get the whole `<the_extensions_folder_with_scx_files_in_them>`, select the folder you just found and hit option-command-c. This should copy the path, which you can then paste into the above command; i.e., `xattr -c /Users/me/Library/Application Support/SuperCollider/Extensions/SC3plugins/*.scx`. 
 
 Marcin Paczkowski has written a [script to do this](https://scsynth.org/t/building-supercollider-and-plugins-on-mac-m1/4626/60?u=mphonic), as well.
