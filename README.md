@@ -29,7 +29,7 @@ There are instructions in the sc3-plugins README that explain how to install. Th
 2. Drag the unzipped folders into your Extensions folder. Some extensions may have different folders for different architectures, like one for 32-bit systems vs 64-bit. Choose the one that is appropriate for your system.
 3. Close and reopen Supercollider. You should be good to go. You can test by opening `test-install.scd` and running the code.
 
-If you are using OSX and your system is attempting to quarantine the extensions, see the section at the bottom of this document, [Mac Users and Quarantine](#mac-users-and-quarantine). The `init.scd` script attempts to avoid this, and there is a separate file that should unquarantine all of your extensions if you installed them manually, `unquarantine-mac-extensions.scd`.
+If you are using OSX and your system is attempting to quarantine the extensions, try running the code in `unquarantine-mac-extensions.scd`. If your extensions are still quarantined, see the section at the bottom of this document, [Mac Users and Quarantine](#mac-users-and-quarantine).
 
 ## Important Supercollider Key Commands
 
