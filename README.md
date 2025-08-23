@@ -15,6 +15,8 @@ This is a one-person operation. Please enjoy the fruits of open source software 
 
 This software needs to be run in [Supercollider](https://supercollider.github.io/downloads.html), which is free. You don't need to know anything about Supercollider to use xynthii, but if you know Supercollider, you can use it to incorporate and control xynthii in a vast array of situations.
 
+Note: If you have a Mac with an ARM processor (M1/2/etc), no matter which step you follow below, you will have to do an extra step to install PortedPlugins. See [PortedPlugins on ARM Architecture](#ported-plugins-on-arm-architecture) below.
+
 Xynthii uses three extension packages. If you are a beginner and are running OSX or Windows on a relatively modern machine, you can install these using the "easy" method:
 
 Open Supercollider and, within Supercollider, open `init.scd` from this package. Run the code in `init.scd` (instructions are in the file). This should install extensions in the proper location. Quit and reopen Supercollider, and you should be good to go. You can double-check by opening `test-install.scd` and running the code there.
@@ -160,3 +162,177 @@ For modules that make sound (as opposed to modules like envelopes), you can doub
 It's possible that OSX will complain about the extensions and try to quarantine them. The `init.scd` script attempts to avoid this, and there is an additional file you can run separately called `unquarantine-mac-extensions.scd`. If your extensions are still quarantined after these steps, you can unquarantine them by opening the terminal and running `xattr -c <the_extensions_folders_with_scx_files_in_them>/*.scx`. You'll need to run this for each extension. Use `Platform.userExtensionDir.openOS` as above to find the main extensions folder, then go into each extension folder and find the folder that has files that end in `.scx`. To get the whole `<the_extensions_folder_with_scx_files_in_them>`, select the folder you just found and hit option-command-c. This should copy the path, which you can then paste into the above command; i.e., `xattr -c /Users/me/Library/Application Support/SuperCollider/Extensions/SC3plugins/*.scx`. 
 
 Marcin Paczkowski has written a [script to do this](https://scsynth.org/t/building-supercollider-and-plugins-on-mac-m1/4626/60?u=mphonic), as well.
+
+## PortedPlugins on ARM Architecture
+
+There is not currently a prebuilt package of PortedPlugins for the ARM architecture. If you are not up to building these from source or are stuck having issues, you can change some code in the xynthii package so that you don't need PortedPlugins:
+
+Open `modules/xfilt.scd`. Near the beginning, there are SynthDefs, and the first two are commented out. Uncomment those and comment out the other two. So, the code in that section should go from this:
+
+```
+        /*SynthDef(\moogLadder, {|in = 30,
+			ffreq = 440,
+			ffreqmul = 1,
+			res = 0.0,
+			fmIn = 30
+			fmLevel = 0.0,
+			amp = 1,
+			out = 0|
+			var signalInput, fm, filt;
+			signalInput = In.ar(in, 1) * 0.334;
+			fm = (In.ar(fmIn, 1) * fmLevel).range(-72, 72).midiratio;
+			ffreq = ffreq.lag(0.02) * fm;
+			filt = BMoog.ar(
+				signalInput,
+				(ffreq * ffreqmul).max(20).min(20000),
+				res,
+				mul: amp
+			);
+			Out.ar(out, filt);
+		}),
+		SynthDef(\blowpass, {|in = 30,
+			ffreq = 440,
+			ffreqmul = 1,
+			res = 0.0,
+			fmIn = 30
+			fmLevel = 0.0,
+			amp = 1,
+			out = 0|
+			var signalInput, fm, filt;
+			signalInput = In.ar(in, 1);
+			fm = (In.ar(fmIn, 1) * fmLevel).range(-72, 72).midiratio;
+			ffreq = ffreq.lag(0.02) * fm;
+			filt = BLowPass.ar(
+				signalInput,
+				(ffreq * ffreqmul).max(20).min(20000),
+				res.linlin(0.0, 1.0, 1.0, 0.01),
+				mul: amp
+			);
+			Out.ar(out, filt);
+		}),*/
+		SynthDef(\vaLadder24, {|in = 30,
+			ffreq = 440,
+			ffreqmul = 1,
+			res = 0.0,
+			fmIn = 30
+			fmLevel = 0.0,
+			amp = 1,
+			out = 0|
+			var signalInput, fm, filt;
+			signalInput = In.ar(in, 1) * 0.25;
+			fm = (In.ar(fmIn, 1) * fmLevel).range(-72, 72).midiratio;
+			ffreq = ffreq.lag(0.02) * fm;
+			filt = VALadder.ar(
+				signalInput,
+				(ffreq * ffreqmul).max(20).min(20000),
+				res,
+				type: 0
+			);
+			Out.ar(out, filt * amp);
+		}),
+		SynthDef(\vaLadder12, {|in = 30,
+			ffreq = 440,
+			ffreqmul = 1,
+			res = 0.0,
+			fmIn = 30
+			fmLevel = 0.0,
+			amp = 1,
+			out = 0|
+			var signalInput, fm, filt;
+			signalInput = In.ar(in, 1) * 0.25;
+			fm = (In.ar(fmIn, 1) * fmLevel).range(-72, 72).midiratio;
+			ffreq = ffreq.lag(0.02) * fm;
+			filt = VALadder.ar(
+				signalInput,
+				(ffreq * ffreqmul).max(20).min(20000),
+				res,
+				type: 1
+			);
+			Out.ar(out, filt * amp);
+		})
+```
+to this:
+```
+        SynthDef(\moogLadder, {|in = 30,
+			ffreq = 440,
+			ffreqmul = 1,
+			res = 0.0,
+			fmIn = 30
+			fmLevel = 0.0,
+			amp = 1,
+			out = 0|
+			var signalInput, fm, filt;
+			signalInput = In.ar(in, 1) * 0.334;
+			fm = (In.ar(fmIn, 1) * fmLevel).range(-72, 72).midiratio;
+			ffreq = ffreq.lag(0.02) * fm;
+			filt = BMoog.ar(
+				signalInput,
+				(ffreq * ffreqmul).max(20).min(20000),
+				res,
+				mul: amp
+			);
+			Out.ar(out, filt);
+		}),
+		SynthDef(\blowpass, {|in = 30,
+			ffreq = 440,
+			ffreqmul = 1,
+			res = 0.0,
+			fmIn = 30
+			fmLevel = 0.0,
+			amp = 1,
+			out = 0|
+			var signalInput, fm, filt;
+			signalInput = In.ar(in, 1);
+			fm = (In.ar(fmIn, 1) * fmLevel).range(-72, 72).midiratio;
+			ffreq = ffreq.lag(0.02) * fm;
+			filt = BLowPass.ar(
+				signalInput,
+				(ffreq * ffreqmul).max(20).min(20000),
+				res.linlin(0.0, 1.0, 1.0, 0.01),
+				mul: amp
+			);
+			Out.ar(out, filt);
+		}),
+		/*SynthDef(\vaLadder24, {|in = 30,
+			ffreq = 440,
+			ffreqmul = 1,
+			res = 0.0,
+			fmIn = 30
+			fmLevel = 0.0,
+			amp = 1,
+			out = 0|
+			var signalInput, fm, filt;
+			signalInput = In.ar(in, 1) * 0.25;
+			fm = (In.ar(fmIn, 1) * fmLevel).range(-72, 72).midiratio;
+			ffreq = ffreq.lag(0.02) * fm;
+			filt = VALadder.ar(
+				signalInput,
+				(ffreq * ffreqmul).max(20).min(20000),
+				res,
+				type: 0
+			);
+			Out.ar(out, filt * amp);
+		}),
+		SynthDef(\vaLadder12, {|in = 30,
+			ffreq = 440,
+			ffreqmul = 1,
+			res = 0.0,
+			fmIn = 30
+			fmLevel = 0.0,
+			amp = 1,
+			out = 0|
+			var signalInput, fm, filt;
+			signalInput = In.ar(in, 1) * 0.25;
+			fm = (In.ar(fmIn, 1) * fmLevel).range(-72, 72).midiratio;
+			ffreq = ffreq.lag(0.02) * fm;
+			filt = VALadder.ar(
+				signalInput,
+				(ffreq * ffreqmul).max(20).min(20000),
+				res,
+				type: 1
+			);
+			Out.ar(out, filt * amp);
+		})*/
+```
+
+Save the file. Make sure any PortedPlugins files are no longer in your Extensions folder. Restart SC and run xynthii. You should be good to go. The filters will be slightly different, but they still sound nice!
