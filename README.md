@@ -121,7 +121,7 @@ Using the envelopes in the traditional sense of "putting a sound through an enve
 
 ## The Routing Matrix
 
-The grid on the right of interface is the routing matrix. This is where you control where signals flow. The rows of the matrix are outputs, and the columns are inputs. To hear a sound, something will have to be routed to the input of at least one of the two output modules, `OU1` and `OU2`.
+The grid on the right of the interface is the routing matrix. This is where you control where signals flow. The rows of the matrix are outputs, and the columns are inputs. To hear a sound, something will have to be routed to the input of at least one of the two output modules, `OU1` and `OU2`.
 
 Any output can be routed to multiple inputs. Feedback, like connecting `O1` to `O1 fm`, is perfectly fine, though if you send, say, the filter output into the filter input (`F` to `F`), you'll likely just get some screeching.
 
