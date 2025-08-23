@@ -185,7 +185,7 @@
 			~clk2trap.run(false);
 
 			~patcher = ~audioPatchbay.create(~sortedModules);
-			~modPod = ~controlPatchbay.create(~sortedModules, envs.modules);
+			~modPod = ~controlPatchbay.create(~sortedModules, envs.modules ++ [~in1, ~in2]);
 			s.sync;
 
 			~makeGui = {|self, bounds, keepUpdated, knobMode = \vert|

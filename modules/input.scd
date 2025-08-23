@@ -6,15 +6,19 @@
 	synthDef: SynthDef(\input, {|
 		source = 0,
 		amp = 1.0,
-		out = 30|
+		out = 30,
+		envOut = 34|
 		var sig;
 		sig = SoundIn.ar(source, amp);
+		Out.kr(envOut,
+			Amplitude.kr(sig) * 2 - 1
+		);
 		Out.ar(
 			out,
 			sig
 		);
 	}),
-	outputConfig: Dictionary[\out -> \a],
+	outputConfig: Dictionary[\out -> \a, \envOut -> \k],
 	makeGui: {|self, parent, styles, canSync = false, syncSource|
 		var style = styles ? Event.new,
 		ks = style.knobSize ? 50,
