@@ -13,14 +13,14 @@
 			amp = 1,
 			out = 0|
 			var signalInput, fm, filt;
-			signalInput = In.ar(in, 1);
-			fm = (In.ar(fmIn, 1) * fmLevel).range(-64, 64).midiratio;
+			signalInput = In.ar(in, 1) * 0.334;
+			fm = (In.ar(fmIn, 1) * fmLevel).range(-72, 72).midiratio;
 			ffreq = ffreq.lag(0.02) * fm;
 			filt = BMoog.ar(
 				signalInput,
-				ffreq.max(20).min(20000),
+				(ffreq * ffreqmul).max(20).min(20000),
 				res,
-				mul: amp * 0.334
+				mul: amp
 			);
 			Out.ar(out, filt);
 		}),
@@ -34,11 +34,11 @@
 			out = 0|
 			var signalInput, fm, filt;
 			signalInput = In.ar(in, 1);
-			fm = (In.ar(fmIn, 1) * fmLevel).range(-64, 64).midiratio;
+			fm = (In.ar(fmIn, 1) * fmLevel).range(-72, 72).midiratio;
 			ffreq = ffreq.lag(0.02) * fm;
 			filt = BLowPass.ar(
 				signalInput,
-				ffreq.ring1(fm).max(20).min(20000),
+				(ffreq * ffreqmul).max(20).min(20000),
 				res.linlin(0.0, 1.0, 1.0, 0.01),
 				mul: amp
 			);
