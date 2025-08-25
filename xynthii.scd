@@ -206,7 +206,7 @@
 				}), // main container
 				mf = mc.addFlowLayout(0@0, 0@0),
 
-				cv = View(mc, 1070@(w.bounds.height - 270)), // controls container
+				cv = View(mc, 1070@(mc.bounds.height - 270)), // controls container
 				cf = cv.addFlowLayout(0@0, gl@gt),
 
 				dv = View(cv, cv.bounds.width@28), // l / s buttons
