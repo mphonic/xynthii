@@ -8,24 +8,7 @@ Quit and reopen Supercollider. If you want to double-check installation, open te
 (
 var arc = Platform.architecture,
 ext = Platform.userExtensionDir,
-dir = Document.current.dir ++ "/extensions",
-unquarantine;
-
-unquarantine = {|ext|
-	(ext ++ "/*").pathMatch
-	.select({|p|
-		"^[.]".matchRegexp(p).not;
-	})
-	.do({|p|
-		("(.scx)$".matchRegexp(p)).if({
-			("xattr -rd com.apple.quarantine " ++ p).unixCmd;
-		}, {
-			(File.type(p) == \directory).if({
-				unquarantine.value(p);
-			});
-		});
-	});
-};
+dir = Document.current.dir ++ "/extensions";
 
 Platform.case(
 	\linux, { "Please follow instructions in README to install extensions.".postln; },
@@ -74,7 +57,7 @@ Platform.case(
 	},
 	\osx, {
 		var paths,
-		skipMatch = ("_arm".matchRegexp(arc.asString)).if({ "_intel" }, { "_arm" });
+		skipMatch = ("(AArch|_arm)".matchRegexp(arc.asString)).if({ "_intel" }, { "_arm" });
 
 		dir = dir ++ "/mac/";
 		paths = (dir ++ "*").pathMatch
@@ -103,26 +86,30 @@ Platform.case(
 			dest = ext ++ "/" ++ name;
 			("cp -r '" ++ path ++ "' '" ++ ext ++ "/'").unixCmd;
 			dest;
-		})
-		.collect({|path|
-			unquarantine.value(path);
-			path;
-		})
-		.collect({|path|
-			(File.exists(path).not).if({
-				("**********ERROR: Did not successfully copy " ++ path).postln;
-				"Follow instructions in README for installing extensions".postln;
-				false;
-			}, {
-				true;
-			});
-		})
-		.select({|b| b.not });
-		(paths.size > 0).if({
-			"*Sorry, the installation of extensions was unsuccessful. Please follow the instructions in the README to manually install extensions. Don't worry, it's not hard*".postln;
-		}, {
-			"Installation successful. Quit then restart Supercollider. Open play-xynthii.scd and execute the code to start using xynthii.".postln;
 		});
+		{
+			"Copying files...".postln;
+			1.wait;
+			paths = paths
+			.collect({|path|
+				(File.exists(path).not).if({
+					("**********ERROR: Did not successfully copy " ++ path).postln;
+					"Follow instructions in README for installing extensions".postln;
+					false;
+				}, {
+					true;
+				});
+			})
+			.select({|b| b.not });
+			(paths.size > 0).if({
+				"*Sorry, the installation of extensions was unsuccessful. Please follow the instructions in the README to manually install extensions. Don't worry, it's not hard*".postln;
+			}, {
+				"Plugins were installed successfully. You will need to unquarantine some by opening Applications -> Utilities -> Terminal and running these two lines:".postln;
+				("xattr -c " ++ ext ++ "/PortedPlugins/*.scx").postln;
+				("xattr -c " ++ ext ++ "/OversamplingOscillators/scx_files/*.scx").postln;
+				"Then quit and restart Supercollider. Open play-xynthii.scd and execute the code to start using xynthii.".postln;
+			});
+		}.fork;
 	}
 );
 )
