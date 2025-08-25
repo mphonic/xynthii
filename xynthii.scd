@@ -189,13 +189,21 @@
 			s.sync;
 
 			~makeGui = {|self, bounds, keepUpdated, knobMode = \vert|
-				var w = Window("xynthii", bounds ? Rect(10, Window.screenBounds.height - 830, 1448, 755)),
+				var b = bounds ? Rect(10, (Window.screenBounds.height - 830).max(0), 1448, 755),
+				w = Window("xynthii", bounds ? Rect(b.left, b.top, 1448, 755)),
 				pl = self.style.paddingLeft ? 20,
 				pt = self.style.paddingTop ? 20,
 				gl = self.style.gapLeft ? 4,
 				gt = self.style.gapTop ? 4,
 				f = w.addFlowLayout(pl@pt, gl@gt),
-				mc = View(w, w.bounds), // main container
+				mc = (
+					(Window.screenBounds.width < 1448)
+					.or(Window.screenBounds.height < 755)
+				).if({
+					ScrollView(bounds: 1448@755)
+				}, {
+					View(bounds: 1448@755)
+				}), // main container
 				mf = mc.addFlowLayout(0@0, 0@0),
 
 				cv = View(mc, 1070@(w.bounds.height - 270)), // controls container
@@ -382,6 +390,8 @@
 				self.seq2OscGui(sv, self.style, true);
 
 				self.seq.makeGui(sv, self.style);
+
+				w.layout_(HLayout(mc));
 
 				self.guiWindow = w;
 
