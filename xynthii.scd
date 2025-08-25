@@ -195,7 +195,6 @@
 				pt = self.style.paddingTop ? 20,
 				gl = self.style.gapLeft ? 4,
 				gt = self.style.gapTop ? 4,
-				f = w.addFlowLayout(pl@pt, gl@gt),
 				mc = (
 					(Window.screenBounds.width < 1448)
 					.or(Window.screenBounds.height < 755)
