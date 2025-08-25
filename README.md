@@ -17,7 +17,7 @@ This software needs to be run in [Supercollider](https://supercollider.github.io
 
 Xynthii uses three extension packages. If you are a beginner and are running OSX or Windows on a relatively modern machine, you can install these using the "easy" method:
 
-Open Supercollider and, within Supercollider, open `init.scd` from this package. Run the code in `init.scd` (instructions are in the file). This should install extensions in the proper location. If you are a Mac user, there will be instructions in the post window to run two commands in the Terminal so that you don't get complaints when you try to run xynthii. Run those. Quit and reopen Supercollider, and you should be good to go. You can double-check by opening `test-install.scd` and running the code there.
+Open Supercollider and, within Supercollider, open `init.scd` from this package. Run the code in `init.scd` (instructions are in the file). This should install extensions in the proper location. If you are a Mac user, there will be instructions in the post window to run two commands in the Terminal so that you don't get complaints when you try to run xynthii (see [Mac Users and Quarantine](#mac-users-and-quarantine)). Run those. Quit and reopen Supercollider, and you should be good to go. You can double-check by opening `test-install.scd` and running the code there.
 
 If you get errors using the above method or you use Linux or are simply a more seasoned Supercollider user, you can install the extensions manually. It is a simple process that just requires downloading some files and moving them to the appropriate folder:
 
@@ -27,9 +27,8 @@ There are instructions in the sc3-plugins README that explain how to install. Th
 
 1. Find your Supercollider Extensions folder. To do this, you can open a new document in Supercollider and type `Platform.userExtensionDir.openOS`. With your cursor on the same line as this bit of code, hit shift-Return (Mac) or shift-Enter. Your Extensions folder should open in your OS.
 2. Drag the unzipped folders into your Extensions folder. Some extensions may have different folders for different architectures, like one for 32-bit systems vs 64-bit. Choose the one that is appropriate for your system.
-3. Close and reopen Supercollider. You should be good to go. You can test by opening `test-install.scd` and running the code.
-
-If you are using OSX and your system is attempting to quarantine the extensions, see the section at the bottom of this document, [Mac Users and Quarantine](#mac-users-and-quarantine).
+3. If you're using OSX, you will have to unquarantine Ported Plugins and Oversampling Oscillators. See [Mac Users and Quarantine](#mac-users-and-quarantine). 
+4. Close and reopen Supercollider. You should be good to go. You can test by opening `test-install.scd` and running the code.
 
 Finally, if you're a Mac user and are having issues with PortedPlugins, see [PortedPlugins on ARM Architecture](#portedplugins-on-arm-architecture) below. It is possible to modify xynthii to run without them.
 
@@ -169,7 +168,7 @@ For modules that make sound (as opposed to modules like envelopes), you can doub
 
 ## Mac Users and Quarantine
 
-It's possible that OSX will complain about the extensions and try to quarantine them. The `init.scd` script attempts to avoid this and outputs two lines to run in the Terminal to unquarantine extensions. Make sure to run those lines. If your extensions are still quarantined after these steps, you can unquarantine them by opening the terminal and running `xattr -c <the_extensions_folders_with_scx_files_in_them>/*.scx`. You'll need to run this for each extension. Use `Platform.userExtensionDir.openOS` as above to find the main extensions folder, then go into each extension folder and find the folder that has files that end in `.scx`. To get the whole `<the_extensions_folder_with_scx_files_in_them>`, select the folder you just found and hit option-command-c. This should copy the path, which you can then paste into the above command; i.e., `xattr -c /Users/me/Library/Application\ Support/SuperCollider/Extensions/SC3plugins/*.scx`. 
+OSX attempts to quarantine some binary files when it isn't sure whether to "trust" them. If you don't take unquarantine steps, you'll see this when you try to run xynthii in the form of dialog windows opening for each extension. You could try to manage all of these one by one by following instructions from the "?" in the dialog windows, but you really want to avoid being in this situation in the first place. The `init.scd` script helps avoid this by outputting two lines to run in the Terminal (Applications -> Utilities -> Terminal) to unquarantine extensions (they each start with `xattr -c ...`). Make sure to run those lines -- copy the entirety of each line from the Supercollider Post Window and execute (paste the line and hit Return) each separately in the Terminal. If you chose to do a manual installation, you can unquarantine extensions by opening the terminal and running `xattr -c <the_extensions_folders_with_scx_files_in_them>/*.scx`. You'll need to run this for both Ported Plugins and Oversampling Oscillators. Use `Platform.userExtensionDir.openOS` as above to find the main extensions folder, then go into each relevant extension folder and find the folder that has files that end in `.scx`. To get the whole `<the_extensions_folder_with_scx_files_in_them>`, select the folder you just found and hit option-command-c. This should copy the path, which you can then paste into the above command; i.e., `xattr -c /Users/me/Library/Application\ Support/SuperCollider/Extensions/SC3plugins/*.scx`. 
 
 Marcin Paczkowski has written a [script to do this](https://scsynth.org/t/building-supercollider-and-plugins-on-mac-m1/4626/60?u=mphonic), as well.
 
