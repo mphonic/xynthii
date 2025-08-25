@@ -62,7 +62,9 @@ Xynthii is now running, but you'll probably want an interface. Put your cursor o
 ```
 ~xynthii.makeGui();
 ```
-Then hit shift-Enter (shift-Return on Mac). The xynthii interface should open (it may open in a background window, so check your app tray / dock for a grey cube icon). Hit "L" on the interface to load presets.
+Then hit shift-Enter (shift-Return on Mac). The xynthii interface should open (it may open in a background window, so check your app tray / dock for a grey cube icon). If your screen is small / low resolution, the entire interface may not all fit, but it should be scrollable so that you can reach all of the elements.
+
+Hit "L" on the interface to load presets.
 
 "S" allows you to save the current state as a preset. "R" records the audio into the `/recordings` folder (remember to hit it again to stop recording). Hitting ctrl-. (cmd-. on Mac) will stop everything and close the interface window. Just repeat the steps above to start again.
 
