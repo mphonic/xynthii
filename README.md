@@ -13,6 +13,8 @@ This is a one-person operation. Please enjoy the fruits of open source software 
 
 ## Installation
 
+Follow the instructions below. If you are an absolute beginner or would just prefer a video guide, you can watch [Xynthii Installation for Absolute Beginners](https://youtu.be/9RdC2rJTiT4).
+
 This software needs to be run in [Supercollider](https://supercollider.github.io/downloads.html), which is free. You don't need to know anything about Supercollider to use xynthii, but if you know Supercollider, you can use it to incorporate and control xynthii in a vast array of situations.
 
 Xynthii uses three extension packages. If you are a beginner and are running OSX or Windows on a relatively modern machine, you can install these using the "easy" method:
