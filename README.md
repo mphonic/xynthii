@@ -17,7 +17,10 @@ This software needs to be run in [Supercollider](https://supercollider.github.io
 
 Xynthii uses three extension packages. If you are a beginner and are running OSX or Windows on a relatively modern machine, you can install these using the "easy" method:
 
-Open Supercollider and, within Supercollider, open `init.scd` from this package. Run the code in `init.scd` (instructions are in the file). This should install extensions in the proper location. If you are a Mac user, there will be instructions in the Post Window to run two commands in the Terminal (Applications -> Utilities -> Terminal) so that you don't get complaints when you try to run xynthii (see [Mac Users and Quarantine](#mac-users-and-quarantine)). Execute those in the Terminal by copying each line, pasting it in the Terminal, and hitting Return. Quit and reopen Supercollider, and you should be good to go. You can double-check by opening `test-install.scd` and running the code there.
+1. Open Supercollider and, within Supercollider, open `init.scd` from this package. 
+2. Run the code in `init.scd` (instructions are in the file). This should install extensions in the proper location. 
+3. If you are a Mac user, there will be instructions in the Post Window to run two commands in the Terminal (Applications -> Utilities -> Terminal) so that you don't get complaints when you try to run xynthii (see [Mac Users and Quarantine](#mac-users-and-quarantine)). Execute those in the Terminal by copying each line, pasting it in the Terminal, and hitting Return. 
+4. Quit and reopen Supercollider, and you should be good to go. You can double-check by opening `test-install.scd` and running the code there.
 
 If you get errors using the above method or you use Linux or are simply a more seasoned Supercollider user, you can install the extensions manually. It is a simple process that just requires downloading some files and moving them to the appropriate folder:
 
