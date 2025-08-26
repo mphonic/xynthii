@@ -29,7 +29,7 @@ extension = (
 		outputs,
 		inputs,
 		buttonSize = bs ? 20,
-		textWindowWidth = tw ? 30,
+		textWindowWidth = tw ? 35,
 		textWindowHeight = th ? 87,
 		fontSize = fs ? 10,
 		viewHeight,

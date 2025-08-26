@@ -190,18 +190,20 @@
 
 			~makeGui = {|self, bounds, keepUpdated, knobMode = \vert|
 				var b = bounds ? Rect(10, (Window.screenBounds.height - 830).max(0), 1448, 755),
-				w = Window("xynthii", bounds ? Rect(b.left, b.top, 1448, 755)),
-				pl = self.style.paddingLeft ? 20,
+				ww = 1453,
+				wh = 755
+				w = Window("xynthii", bounds ? Rect(b.left, b.top, ww, wh)),
+				pl = self.style.paddingLeft ? 15,
 				pt = self.style.paddingTop ? 20,
 				gl = self.style.gapLeft ? 4,
 				gt = self.style.gapTop ? 4,
 				mc = (
-					(Window.screenBounds.width < 1448)
-					.or(Window.screenBounds.height < 755)
+					(Window.screenBounds.width < ww)
+					.or(Window.screenBounds.height < wh)
 				).if({
-					ScrollView(bounds: 1448@755)
+					ScrollView(bounds: ww@wh)
 				}, {
-					View(bounds: 1448@755)
+					View(bounds: ww@wh)
 				}), // main container
 				mf = mc.addFlowLayout(0@0, 0@0),
 
@@ -211,7 +213,7 @@
 				dv = View(cv, cv.bounds.width@28), // l / s buttons
 				df = dv.addFlowLayout(0@0, gl@gt),
 
-				pv = View(mc, 350@(cv.bounds.height)), // patch container
+				pv = View(mc, 355@(cv.bounds.height)), // patch container
 				pf = pv.addFlowLayout(0@0, 0@0),
 
 				sv = View(mc, mc.bounds.width@150), // lower container
@@ -270,10 +272,8 @@
 						s.stopRecording;
 					});
 				});
-				self.presetNameView = StaticText(dv, ((self.presetName ? "default").size * 5 + 35)@20)
-				.string_("Patch: " ++ (self.presetName ? "default"))
-				.align_(\right);
-				StaticText(dv, 500@20).string_("  <xynthii>");
+				self.presetNameView = StaticText(dv, 600@20)
+				.string_(" <xynthii> Patch: " ++ (self.presetName ? "default"));
 
 				self.osc1.makeGui(ov, self.style);
 				of.nextLine;
@@ -450,7 +450,7 @@
 					.value_(isOn[c].and(allOn.not).asInteger)
 				});
 
-				View(view, 40@100).layout_(VLayout(
+				View(view, 42@100).layout_(VLayout(
 					[nil, stretch: 1],
 					[StaticText().string_(n), align: \top],
 					[butts[0], align: \bottom],
@@ -635,7 +635,7 @@
 							var b = self.guiWindow.bounds;
 							self.guiWindow.close;
 							self.makeGui(b);
-							self.presetNameView.string_("Patch: " ++ name);
+							self.presetNameView.string_(" <xynthii> Patch: " ++ name);
 						}.defer;
 					});
 				}.fork;
@@ -645,7 +645,11 @@
 				self.dumpSettings({|v|
 					v.writeTextArchive(path);
 					{
-						self.presetNameView.string_("Patch: " ++ path.split($/).pop());
+						var nv = self.presetNameView,
+						b = nv.bounds,
+						n = path.split($/).pop();
+						nv.string_(" <xynthii> Patch: " ++ n)
+						.bounds_(Rect(b.left, b.top, 600, 20));
 					}.defer;
 					("Settings saved to " ++ path).postln;
 					cb.value(v);
