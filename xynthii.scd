@@ -189,10 +189,10 @@
 			s.sync;
 
 			~makeGui = {|self, bounds, keepUpdated, knobMode = \vert|
-				var b = bounds ? Rect(10, (Window.screenBounds.height - 830).max(0), 1448, 755),
-				ww = 1453,
-				wh = 755
-				w = Window("xynthii", bounds ? Rect(b.left, b.top, ww, wh)),
+				var ww = 1453,
+				wh = 755,
+				b = bounds ? Rect(10, (Window.screenBounds.height - 830).max(0), ww, wh),
+				w = Window("xynthii", b ? Rect(b.left, b.top, ww, wh)),
 				pl = self.style.paddingLeft ? 15,
 				pt = self.style.paddingTop ? 20,
 				gl = self.style.gapLeft ? 4,
