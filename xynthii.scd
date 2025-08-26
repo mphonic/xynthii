@@ -1,8 +1,8 @@
 (
 ~makeXynthii = {|cb, outputBus = 0|
-	var dfam;
+	var xynthii;
 	s.waitForBoot({
-		dfam = Environment.make({
+		xynthii = Environment.make({
 			var docDir = Document.current.dir,
 			base = [
 				"modules/base/module",
@@ -669,12 +669,12 @@
 			"Loading settings...".postln;
 		});
 
-		dfam.know = true;
-		dfam.loadSettings(Document.current.dir ++ "/presets/default", {
+		xynthii.know = true;
+		xynthii.loadSettings(Document.current.dir ++ "/presets/default", {
 			"Settings loaded.".postln;
 			"Ready to go.".postln;
 		});
-		cb.value(dfam);
+		cb.value(xynthii);
 	});
 }
 )
