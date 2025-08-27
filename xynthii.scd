@@ -249,14 +249,14 @@
 				.action_({
 					FileDialog({|p|
 						self.loadSettings(p[0]);
-					}, nil, 1, 0, path: "presets");
+					}, nil, 1, 0, path: docDir ++ "/presets");
 				});
 				Button(dv, 20@20)
 				.states_([["S"]])
 				.action_({
 					FileDialog({|p|
 						self.saveSettings(p[0]);
-					}, nil, 1, 1, path: "presets");
+					}, nil, 1, 1, path: docDir ++ "/presets");
 				});
 				Button(dv, 20@20)
 				.states_([["R"], ["O", Color.white, Color.red]])
