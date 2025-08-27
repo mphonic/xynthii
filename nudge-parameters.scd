@@ -83,12 +83,12 @@ nudge = {|dev = 0.1, exclude, excludeButtons = false|
 	});
 },
 dev = 0.05,
-exclude = nil,
+exclude = List.new,
 // if you want to exclude certain modules, you can add them to
 // an exclude array, instead of using exclude = nil; i.e.,
 // exclude = [\modPod, \seq],
 excludeButtons = true, // set to false if you want buttons nudged, too
-w = Window("Xynthii Nudge Params", Rect(10, 500, 300, 60));
+w = Window("Xynthii Nudge Params", Rect(10, 500, 450, 60));
 w.layout_(HLayout(
 	[Button()
 	.states_([["Nudge"]])
@@ -99,7 +99,36 @@ w.layout_(HLayout(
 		Knob()
 		.action_({|v| dev = v.value.linexp(0, 1.0, 0.01, 1.0) })
 		.value_(0.05.explin(0.01, 1.0, 0.0, 1))
-	)
+	),
+	Button()
+	.states_([["ModPod: On"], ["ModPod: Off"]])
+	.action_({|v|
+		(v.value == 0).if({
+			exclude.removeAt(exclude.indexOf(\modPod));
+		}, {
+			exclude.indexOf(\modPod) ? exclude.add(\modPod);
+		})
+	}),
+	Button()
+	.states_([["Seq: On"], ["Seq: Off"]])
+	.action_({|v|
+		(v.value == 0).if({
+			exclude.removeAt(exclude.indexOf(\seq));
+		}, {
+			exclude.indexOf(\seq) ? exclude.add(\seq);
+		})
+	}),
+	Button()
+	.states_([["Outs: On"], ["Outs: Off"]])
+	.action_({|v|
+		(v.value == 0).if({
+			exclude.removeAt(exclude.indexOf(\out1));
+			exclude.removeAt(exclude.indexOf(\out2));
+		}, {
+			exclude.indexOf(\out1) ? exclude.add(\out1);
+			exclude.indexOf(\out2) ? exclude.add(\out2);
+		})
+	})
 ));
 CmdPeriod.doOnce({ w.close });
 w.view.palette_(QPalette.dark);
