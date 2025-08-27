@@ -5,7 +5,7 @@
 // Wait til you see "Ready to go."
 ~xynthii.makeGui();
 
-// Is the text on your interface getting cutoff? You can change the font and size if you want:
+// Is the text on your xynthii interface getting cut off? You can change the font and size if you want:
 Font.default = Font("Arial", 10);
 
 // Run this if you want to use MIDI learn or write custom MIDI

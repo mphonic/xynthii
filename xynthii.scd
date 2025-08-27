@@ -1,10 +1,10 @@
 (
 ~makeXynthii = {|cb, outputBus = 0|
-	var xynthii;
+	var xynthii,
+	docDir = Document.current.dir;
 	s.waitForBoot({
 		xynthii = Environment.make({
-			var docDir = Document.current.dir,
-			base = [
+			var base = [
 				"modules/base/module",
 				"modules/base/controlextension",
 				"modules/base/syncableenvelope",
@@ -263,7 +263,7 @@
 				.action_({|v|
 					(v.value == 1).if({
 						s.record(
-							Document.current.dir ++
+							docDir ++
 							"/recordings/xynthii_" ++
 							Date.getDate().stamp ++
 							".aiff"
@@ -670,7 +670,7 @@
 		});
 
 		xynthii.know = true;
-		xynthii.loadSettings(Document.current.dir ++ "/presets/default", {
+		xynthii.loadSettings(docDir ++ "/presets/default", {
 			"Settings loaded.".postln;
 			"Ready to go.".postln;
 		});
