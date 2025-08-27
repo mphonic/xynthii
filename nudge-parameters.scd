@@ -83,8 +83,11 @@ nudge = {|dev = 0.1, exclude, excludeButtons = false|
 	});
 },
 dev = 0.05,
-exclude = [\modPod],
-excludeButtons = true,
+exclude = nil,
+// if you want to exclude certain modules, you can add them to
+// an exclude array, instead of using exclude = nil; i.e.,
+// exclude = [\modPod, \seq],
+excludeButtons = true, // set to false if you want buttons nudged, too
 w = Window("Xynthii Nudge Params", Rect(10, 500, 300, 60));
 w.layout_(HLayout(
 	[Button()

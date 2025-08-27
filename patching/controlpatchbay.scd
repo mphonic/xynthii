@@ -120,9 +120,11 @@
 		var patch = self.getPatchById(outputKey, id);
 		(patch[\modKey] != modKey).if({
 			var n = patch[\node],
-			bus = self.io[\outputs][modKey][\bus];
-			n.set(\modin, bus, \modmul, mul, \modadd, add, \hasmod, 1);
-			patch[\modKey] = modKey;
+			bus = self.io[\outputs][modKey] !? {|v| v[\bus] };
+			bus !? {|bus|
+				n.set(\modin, bus, \modmul, mul, \modadd, add, \hasmod, 1);
+				patch[\modKey] = modKey;
+			};
 		});
 	},
 	removeModMod: {|self, outputKey, id|
