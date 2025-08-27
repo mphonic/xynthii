@@ -24,6 +24,8 @@ Xynthii uses three extension packages. If you are a beginner and are running OSX
 3. If you are a Mac user, there will be instructions in the Post Window to run two commands in the Terminal (Applications -> Utilities -> Terminal) so that you don't get complaints when you try to run xynthii (see [Mac Users and Quarantine](#mac-users-and-quarantine)). Execute those in the Terminal by copying each line, pasting it in the Terminal, and hitting Return. 
 4. Quit and reopen Supercollider, and you should be good to go. You can double-check by opening `test-install.scd` and running the code there.
 
+Note that this method of installation will copy extensions whether you already have them or not, overwriting any that share the same path. If you wind up with duplicates and Supercollider complains, run `Platform.userExtensionDir.openOS` in Supercollider. It will open your extension folder and allow you to delete any duplicate extensions.
+
 If you get errors using the above method or you use Linux or are simply a more seasoned Supercollider user, you can install the extensions manually. It is a simple process that just requires downloading some files and moving them to the appropriate folder:
 
 Download [sc3-plugins](https://github.com/supercollider/sc3-plugins/releases), [OversamplingOscillators](https://github.com/spluta/OversamplingOscillators/releases/tag/0.3.3) (Linux users will currently have to build this one from source), and [Ported Plugins - All platforms except Macs with ARM chips (M1/2/etc.)](https://github.com/madskjeldgaard/portedplugins/releases/tag/v0.4.1) or [Ported Plugins for Macs with ARM Chips](https://drive.google.com/file/d/12H8EzGksCxIqhgD4ljVHnsHQxanufB7j/view). These are all zip files, so make sure to unzip them after download. 
