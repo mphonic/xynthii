@@ -126,7 +126,7 @@ p = [
 		'syncedWith',  o[8],  nil,  nil,  
 		nil,  nil,  nil,  nil,  
 		nil,  nil,  nil,  nil,  
-		'freq',  131.82566833496,  nil,  nil,  
+		'freq',  261.62557983398,  nil,  nil,  
 		nil,  nil,  nil,  nil,  
 		nil,  nil,  nil,  nil ],  
 	// List
@@ -788,8 +788,8 @@ p = [
 		nil,  nil,  nil,  nil,  
 		'bypassed',  false,  nil,  nil,  
 		nil,  nil,  nil,  nil,  
-		nil,  nil,  'velocity',  0.60000002384186,  
-		'pitch',  -0.31999999284744,  'play',  0,  
+		nil,  nil,  'velocity',  -0.72000002861023,  
+		'pitch',  1.0,  'play',  0,  
 		'v',  o[197],  nil,  nil,  
 		nil,  nil,  'p',  o[198],  
 		nil,  nil,  'tempo',  4.2509427070618,  
@@ -801,9 +801,9 @@ p = [
 		-0.54,  -0.16,  -0.22,  1.0,  
 		-0.52,  -0.24,  -0.72,  -0.72 ],  
 	// Array
-	198, [ -0.32,  1.0,  -0.2,  -0.18,  
-		1.0,  -0.52,  -0.32,  -0.68,  
-		-0.48,  0,  1.0,  0.34,  
+	198, [ -0.32,  1.0,  -0.22,  -0.2,  
+		1.0,  -0.52,  -0.34,  -0.68,  
+		-0.48,  0.06,  1.0,  0.34,  
 		0.34,  0.34,  1.0,  0.34 ],  
 	// Dictionary
 	199, [ array: o[200],  size: 4 ],  

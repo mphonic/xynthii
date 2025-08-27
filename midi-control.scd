@@ -4,6 +4,7 @@
 MIDIIn.connectAll;
 )
 // Wait til you see "Ready to go."
+~xynthii.makeGui();
 // Optionally load this setting
 ~xynthii.loadSettings(Document.current.dir ++ "/presets/leady");
 
@@ -25,8 +26,6 @@ target = \p,
 recordVelocity = true,
 advanceOnKeyUp = true,
 w;
-
-i.makeGui();
 
 noteOn = {|num, val, doTrig = false|
 	(silent.not).if({
