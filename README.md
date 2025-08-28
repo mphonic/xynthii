@@ -169,6 +169,10 @@ But we can track a whole lot more than just the amplitude envelope. The `spectra
 
 This same file also includes an example of adding an effect to the entire xynthii output. This one is pretty wild. It uses Concatenative Synthesis to merge xynthii's output with your input signal. Just run the block of code with `~concat` and experiment. To stop concatenating, run `~concat.free`.
 
+## Adding Features
+
+Because xynthii runs in Supercollider, it can be controlled by and run alongside other Supercollider processes. Spectral Tracking is an example of adding a complex feature. There are some additional files that add simpler features, like `nudge-parameters.scd`, which allows you to nudge knobs and menus by a variable random amount to help experiment with settings, and `preset-station.scd`, which allows you to preload a number of presets into memory and launch them immediately without having to select them again from your file system. 
+
 ## Bypassing Modules
 
 For modules that make sound (as opposed to modules like envelopes), you can double-click on the module to bypass it. This will silence modules like oscillators, and it will cause a signal to pass unaffected through effects like reverb and delay. Double-click again to unbypass. Individual modulations in the mod pod can also be bypassed in this way.
