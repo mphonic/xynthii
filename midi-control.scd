@@ -16,6 +16,7 @@ velocitySensitivity = 0, // 0 = none, 1 = full
 bendRange = 2.0, // semitones
 bend = 0,
 legato = true,
+gate = true,
 silent = false,
 i = ~xynthii,
 turnKeysOn,
@@ -42,7 +43,7 @@ noteOn = {|num, val, doTrig = false|
 turnKeysOn = {
 	MIDIdef.noteOn(\xynthiikeyson, {|val, num, chan, src|
 		(silent.not).if({
-			var doTrig = ((legato.not).or(notes.size == 0));
+			var doTrig = ((legato.not).or(notes.size == 0)).and(gate);
 
 			notes.add(num);
 			noteOn.value(num, val, doTrig);
@@ -52,10 +53,10 @@ turnKeysOn = {
 		(silent.not).if({
 			notes.removeAt(notes.indexOf(num));
 			(notes.size > 0).if({
-				(legato.not).if({ i.trigger(0) });
+				((legato.not).and(gate)).if({ i.trigger(0) });
 				noteOn.value(notes[notes.size - 1])
 			}, {
-				i.trigger(0);
+				(gate).if({ i.trigger(0); });
 			});
 		});
 	});
@@ -135,6 +136,8 @@ w.view.layout_(
 				StaticText().string_("Vel Sens"),
 				Knob().value_(0).action_({|v| velocitySensitivity = v.value })
 			),
+			Button().states_([["Gate: On"], ["Gate: Off"]])
+			.action_({|v| gate = v.value.asBoolean.not }),
 			Button().states_([["Legato: On"], ["Legato: Off"]])
 			.action_({|v| legato = v.value.asBoolean.not }),
 			HLayout(
