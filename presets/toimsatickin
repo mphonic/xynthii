@@ -82,7 +82,7 @@ p = [
 	// Dictionary
 	2, [ array: o[3],  size: 3 ],  
 	// Array
-	3, [ nil,  nil,  'color',  0.37999999523163,  
+	3, [ nil,  nil,  'color',  0.35999998450279,  
 		nil,  nil,  nil,  nil,  
 		nil,  nil,  nil,  nil,  
 		'amp',  0.2703999876976,  nil,  nil,  
@@ -257,7 +257,7 @@ p = [
 	38, [ array: o[39],  size: 7 ],  
 	// Array
 	39, [ nil,  nil,  'selectedSynthDef',  1,  
-		'ffreq',  1240.0885009766,  nil,  nil,  
+		'ffreq',  713.59643554688,  nil,  nil,  
 		nil,  nil,  nil,  nil,  
 		'amp',  1.0,  'res',  0.40000000596046,  
 		nil,  nil,  'fmLevel',  0.10000000149012,  
@@ -523,7 +523,7 @@ p = [
 	138, [ array: o[139],  size: 5 ],  
 	// Array
 	139, [ nil,  nil,  nil,  nil,  
-		nil,  nil,  'tone',  0.0,  
+		nil,  nil,  'tone',  -3.1199998855591,  
 		nil,  nil,  nil,  nil,  
 		'amp',  1.0,  'pan',  0.0,  
 		nil,  nil,  nil,  nil,  
@@ -570,9 +570,9 @@ p = [
 	150, [ array: o[151],  size: 5 ],  
 	// Array
 	151, [ nil,  nil,  nil,  nil,  
-		nil,  nil,  'tone',  0.0,  
+		nil,  nil,  'tone',  1.2000000476837,  
 		nil,  nil,  nil,  nil,  
-		'amp',  1.0,  'pan',  0.0,  
+		'amp',  0.67239999771118,  'pan',  0.0,  
 		nil,  nil,  nil,  nil,  
 		nil,  nil,  nil,  nil,  
 		nil,  nil,  nil,  nil,  
