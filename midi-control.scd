@@ -17,6 +17,7 @@ bendRange = 2.0, // semitones
 bend = 0,
 legato = true,
 gate = true,
+sustain = false,
 silent = false,
 i = ~xynthii,
 turnKeysOn,
@@ -53,10 +54,10 @@ turnKeysOn = {
 		(silent.not).if({
 			notes.removeAt(notes.indexOf(num));
 			(notes.size > 0).if({
-				((legato.not).and(gate)).if({ i.trigger(0) });
+				((legato.not).and(gate)).if({ i.trigger(0 + sustain.asInteger) });
 				noteOn.value(notes[notes.size - 1])
 			}, {
-				(gate).if({ i.trigger(0); });
+				(gate).if({ i.trigger(0 + sustain.asInteger); });
 			});
 		});
 	});
@@ -70,12 +71,17 @@ turnKeysOn = {
 			noteOn.value(d)
 		});
 	});
+	MIDIdef.cc(\xynthiisustain, {|val, num, chan, src|
+		(sustain.and(val < 64).and(notes.size < 1)).if({ i.trigger(0) });
+		sustain = (val > 63);
+	}, 64);
 };
 
 turnKeysOff = {
 	MIDIdef(\xynthiikeyson).free;
 	MIDIdef(\xynthiikeysoff).free;
 	MIDIdef(\xynthiibend).free;
+	MIDIdef(\xynthiisustain).free;
 };
 turnRecordOn = {
 	var q = i.seq,
