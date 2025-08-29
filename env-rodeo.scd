@@ -9,8 +9,8 @@
 // Random walks fill the envelopes and determine rate of gates
 (
 var nodes = 7,
-minDur = 0.25,
-maxDur = 1.0,
+minDur = 0.333,
+maxDur = 1.25,
 dev = 0.1,
 s1,
 s2,
@@ -25,8 +25,8 @@ s3 = [
 	Array.fill(nodes, { Pbrown(minDur, maxDur, 0.05, inf).asStream }),
 	Array.fill(nodes - 1, { Pbrown(-4.0, 4.0, dev, inf).asStream })
 ];
-Tdef(\squiggle).clear;
-Tdef(\squiggle, {
+~squiggle.free;
+~squiggle = Task({
 	inf.do {|c|
 		var s1Val = s1.collect({|e| Array.fill(nodes, {|i| e[i].next }) }),
 		s2Val = s1.collect({|e| Array.fill(nodes - 1, {|i| e[i].next }).normalizeSum }),
@@ -46,6 +46,7 @@ Tdef(\squiggle, {
 		~xynthii.trigger(0);
 		(dur - len).max(0.01).wait;
 	}
-}).play;
+});
+~squiggle.play;
 )
-Tdef(\squiggle).stop; ~xynthii.trigger(0);
+~squiggle.stop; ~xynthii.trigger(0);
