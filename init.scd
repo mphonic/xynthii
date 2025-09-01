@@ -105,8 +105,8 @@ Platform.case(
 				"*Sorry, the installation of extensions was unsuccessful. Please follow the instructions in the README to manually install extensions. Don't worry, it's not hard*".postln;
 			}, {
 				"Plugins were installed successfully. You will need to unquarantine some by opening Applications -> Utilities -> Terminal and running these two lines:".postln;
-				("xattr -c " ++ ext.replace(" ", "\\ ") ++ "/PortedPlugins/*.scx").postln;
-				("xattr -c " ++ ext.replace(" ", "\\ ") ++ "/OversamplingOscillators/scx_files/*.scx").postln;
+				("xattr -rd com.apple.quarantine " ++ ext.replace(" ", "\\ ") ++ "/PortedPlugins/*.scx").postln;
+				("xattr -rd com.apple.quarantine " ++ ext.replace(" ", "\\ ") ++ "/OversamplingOscillators/scx_files/*.scx").postln;
 				"Then quit and restart Supercollider. Open play-xynthii.scd and execute the code to start using xynthii.".postln;
 			});
 		}.fork;
