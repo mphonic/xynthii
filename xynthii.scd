@@ -51,6 +51,7 @@
 			trigEnv;
 
 			~sortedModules = List.new;
+			~presetPath = docDir ++ "/presets";
 			// s.freeAll;
 
 			"Creating modules...".postln;
@@ -249,14 +250,16 @@
 				.action_({
 					FileDialog({|p|
 						self.loadSettings(p[0]);
-					}, nil, 1, 0, path: docDir ++ "/presets");
+						self.presetPath = p[0];
+					}, nil, 1, 0, path: self.presetPath);
 				});
 				Button(dv, 20@20)
 				.states_([["S"]])
 				.action_({
 					FileDialog({|p|
 						self.saveSettings(p[0]);
-					}, nil, 1, 1, path: docDir ++ "/presets");
+						self.presetPath = p[0];
+					}, nil, 1, 1, path: self.presetPath);
 				});
 				Button(dv, 20@20)
 				.states_([["R"], ["O", Color.white, Color.red]])
