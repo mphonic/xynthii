@@ -3,7 +3,7 @@
 ~makeXynthii.value({|d| ~xynthii = d });
 )
 // Wait til you see "Ready to go."
-~xynthii.loadSettings(Document.current.dir ++ "/presets/trackme");
+~xynthii.loadSettings(Document.current.dir ++ "/presets/examples/trackme");
 ~xynthii.makeGui();
 
 ( // Run this to track different properties of the sound from your main input
@@ -20,7 +20,7 @@ d = x.del[\controls],
 v = x.verb[\controls];
 
 ~tracker = SynthDef(\spectrack, {
-	var sig, chain, centroid, flatness, pcile, amplitude, pitch, hasPitch;
+	var sig, chain, centroid, flatness, pcile, amplitude, pitch, hasPitch, noise;
 	sig = SoundIn.ar(0);
 	chain = FFT(LocalBuf(2048), sig, wintype: 1);
 	centroid = SpecCentroid.kr(chain).lag(0.025);
@@ -37,14 +37,15 @@ v = x.verb[\controls];
 	.explin(0.03125, 48, 0, 2.0);
 
 	hasPitch = hasPitch.lag(0.1);
+	noise = (1 - hasPitch).linexp(0, 1.0, 0.01, 1);
 
 	centroid = (centroid.cpsmidi - 60).midiratio;
 
 	Out.kr(o1[\freqmod], pitch);
 	Out.kr(o2[\freqmod], pitch);
 	Out.kr(o3[\freqmod], pitch);
-	Out.kr(v1[\amp], amplitude * hasPitch * (1 - flatness));
-	Out.kr(v2[\amp], amplitude * (1 - hasPitch) * flatness);
+	Out.kr(v1[\amp], amplitude * (1 - noise) * (1 - flatness));
+	Out.kr(v2[\amp], amplitude * noise * flatness);
 	Out.kr(f[\ffreq], pcile);
 	Out.kr(f[\ffreqmul], centroid);
 	Out.kr(o1[\fmLevel], flatness * 0.25);

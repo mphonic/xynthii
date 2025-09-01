@@ -6,7 +6,7 @@ MIDIIn.connectAll;
 // Wait til you see "Ready to go."
 ~xynthii.makeGui();
 // Optionally load this setting
-~xynthii.loadSettings(Document.current.dir ++ "/presets/leady");
+~xynthii.loadSettings(Document.current.dir ++ "/presets/examples/leady");
 
 ( // Keyboard control
 var notes = List.new,

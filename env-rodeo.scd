@@ -3,7 +3,7 @@
 ~makeXynthii.value({|d| ~xynthii = d });
 )
 // Wait til you see "Ready to go."
-~xynthii.loadSettings(Document.current.dir ++ "/presets/soopersawrn");
+~xynthii.loadSettings(Document.current.dir ++ "/presets/examples/soopersawrn");
 ~xynthii.makeGui();
 
 // Random walks fill the envelopes and determine rate of gates
