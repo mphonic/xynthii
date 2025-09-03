@@ -52,6 +52,7 @@
 
 			~sortedModules = List.new;
 			~presetPath = docDir ++ "/presets";
+			~isRecording = false;
 			// s.freeAll;
 
 			"Creating modules...".postln;
@@ -265,6 +266,7 @@
 				.states_([["R"], ["O", Color.white, Color.red]])
 				.action_({|v|
 					(v.value == 1).if({
+						self.isRecording = true;
 						s.record(
 							docDir ++
 							"/recordings/xynthii_" ++
@@ -272,9 +274,11 @@
 							".aiff"
 						);
 					}, {
+						self.isRecording = false;
 						s.stopRecording;
 					});
-				});
+				})
+				.value_(self.isRecording.asInteger);
 				self.presetNameView = StaticText(dv, 600@20)
 				.string_(" <xynthii> Patch: " ++ (self.presetName ? "default"));
 
@@ -402,6 +406,7 @@
 				});
 
 				CmdPeriod.doOnce {
+					self.isRecording = false;
 					w.close;
 					MIDIdef.freeAll;
 				};
