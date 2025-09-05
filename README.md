@@ -76,6 +76,8 @@ Hit "L" on the interface to load presets.
 
 The [Donate](#donate) button reminds you to donate. Did I mention that it really, really helps?
 
+If you're not incredibly familiar with modular synths, read the text below and also watch [this walkthrough video](https://youtu.be/4r2mJQl-51s).
+
 ## Modules that Sync with Other Modules
 
 Buttons with the "^" symbol allow you to sync a given module with another one. 
