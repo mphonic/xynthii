@@ -15,7 +15,7 @@
 			Env.asr(att, 1, dec, curve: curve),
 			(gatemod - 1).max(0) + gate
 		);
-		Out.kr(kOut, A2K.kr(env));
+		Out.kr(kOut, A2K.kr(env) * 2 - 1);
 		Out.ar(
 			out,
 			env
