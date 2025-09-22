@@ -27,7 +27,8 @@
 				"modules/tempo",
 				"modules/multilfo",
 				"modules/xseq",
-				"modules/xy"
+				"modules/xy",
+				"modules/latch"
 			],
 			patching = [
 				"patching/synthdefs",
@@ -79,7 +80,8 @@
 				~tempoclocker,
 				~multilfo,
 				~xSeq,
-				~xy
+				~xy,
+				~latch
 			].do({|e, c|
 				(e.isNil).if({ c.postln; }); // debug
 				e.sendSynthDefs();
@@ -94,6 +96,8 @@
 
 			~osc2.selectedSynthDef = 1;
 			~osc3.selectedSynthDef = 1;
+
+			~lat = ~latch.create('LAT');
 
 			~trap = ~asr.create('E1');
 			~env2 = ~envelope.create('E2');
@@ -136,7 +140,7 @@
 				g: ~groups.outputs
 			);
 			effects = (
-				modules: [~filt, ~ring],
+				modules: [~filt, ~ring, ~lat],
 				g: ~groups.effects
 			);
 			mixers = (
@@ -187,12 +191,12 @@
 			~clk2trap.run(false);
 
 			~patcher = ~audioPatchbay.create(~sortedModules);
-			~modPod = ~controlPatchbay.create(~sortedModules, envs.modules ++ [~in1, ~in2]);
+			~modPod = ~controlPatchbay.create(~sortedModules, envs.modules ++ [~in1, ~in2, ~lat]);
 			s.sync;
 
 			~makeGui = {|self, bounds, keepUpdated, knobMode = \vert|
-				var ww = 1453,
-				wh = 755,
+				var ww = 1493,
+				wh = 757,
 				b = bounds ? Rect(10, (Window.screenBounds.height - 830).max(0), ww, wh),
 				w = Window("xynthii", b ? Rect(b.left, b.top, ww, wh)),
 				pl = self.style.paddingLeft ? 15,
@@ -215,7 +219,7 @@
 				dv = View(cv, cv.bounds.width@28), // l / s buttons
 				df = dv.addFlowLayout(0@0, gl@gt),
 
-				pv = View(mc, 355@(cv.bounds.height)), // patch container
+				pv = View(mc, 395@(cv.bounds.height)), // patch container
 				pf = pv.addFlowLayout(0@0, 0@0),
 
 				sv = View(mc, mc.bounds.width@150), // lower container
@@ -348,6 +352,7 @@
 					[
 						"O1 fm", "O2 fm", "O3 fm",
 						"V1 env", "V1", "V2 env", "V2",
+						"LAT car", "LAT mod",
 						"RNG car", "RNG mod", "F", "F fm",
 						"DEL", "REV l", "REV r", "OU1", "OU2"
 					],
@@ -356,7 +361,7 @@
 						"O1", "O2", "O3", "N",
 						"IN1", "IN2",
 						"F", "V1", "V2",
-						"E1", "E2", "E3", "RNG",
+						"E1", "E2", "E3", "LAT", "RNG",
 						"DEL", "REV l", "REV r"
 					]
 				);

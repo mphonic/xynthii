@@ -200,7 +200,7 @@
 	usePm: false,
 	setFmOrPm: {|self, fm = true|
 		self.usePm = fm.not;
-		self.setParams([\pmLevel, \fmLevel].at(fm.asInteger), 0);
+		self.setParams([\fmLevel, \pmLevel].at(fm.asInteger), 0);
 		self.updateGuiFm();
 	},
 	updateGuiFm: {|self|
