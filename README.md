@@ -119,7 +119,7 @@ You can enter specific values for controls using the text boxes below the accomp
 
 Each oscillator can toggle between two waveforms, saw/tri and pulse (O2 and O3) or sine and saw/tri (O1). O2 and O3 can have their frequencies synced with O1 (see above). They can also be set to a low frequency range via the L/F button. The `pw` knob affects the shape of the waveform in all circumstances, including the sine wave.
 
-The frequency modulation algorithm is a somewhat exotic version of exponential fm. This means that you won't very easily make DX-7 style sounds but that you can quite easily get full-range fm for intense modulations.
+The frequency modulation algorithm is a somewhat exotic version of exponential fm. This means that you won't very easily make DX-7 style sounds but that you can quite easily get full-range fm for intense modulations. You can switch to phase modulation by alt-clicking (option-click on Mac) the frequency modulation text box, which gives a very different sound and is pitch stable.
 
 ## The Envelopes
 
