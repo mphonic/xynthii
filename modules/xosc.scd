@@ -10,13 +10,16 @@
 			freqscale = 0,
 			fmIn = 30
 			fmLevel = 0.0,
+			pmLevel = 0,
 			pw = 0.0,
 			amp = 0.1,
 			out = 0|
 			var sig,
 			phas,
 			phasc,
-			fm = (In.ar(fmIn, 1) * fmLevel);
+			fm = (In.ar(fmIn, 1)),
+			pm = fm * (pmLevel * 8);
+			fm = fm * fmLevel;
 			freq = freq.max(0.01);
 			freq = Select.ar(fm < 0, [
 				fm.linexp(0.0, 1.0, freq, 20000.0),
@@ -42,7 +45,7 @@
 			+ ((pw > 0.1) * phasc);
 			sig = SinOscOS.ar(
 				0,
-				phas * 2,
+				phas * 2 + pm,
 				oversample: 4,
 				mul: amp.lag(0.02)
 			);
@@ -53,11 +56,14 @@
 			freqscale = 0,
 			fmIn = 30
 			fmLevel = 0.0,
+			pmLevel = 0,
 			pw = 0.0,
 			amp = 0.1,
 			out = 0|
 			var sig,
-			fm = (In.ar(fmIn, 1) * fmLevel);
+			fm = (In.ar(fmIn, 1)),
+			pm = fm * (pmLevel * 8);
+			fm = fm * fmLevel;
 			freq = freq.max(0.01);
 			freq = Select.ar(fm < 0, [
 				fm.linexp(0.0, 1.0, freq, 20000.0),
@@ -71,6 +77,7 @@
 			);*/
 			sig = VarSawOS.ar(
 				freq.max(0.01).min(20000),
+				pm,
 				width: pw.lag(0.02),
 				oversample: 4,
 				mul: amp.lag(0.02)
@@ -82,11 +89,14 @@
 			freqscale = 0,
 			fmIn = 30
 			fmLevel = 0.0,
+			pmLevel = 0,
 			pw = 0.5,
 			amp = 0.1,
 			out = 0|
 			var sig,
-			fm = (In.ar(fmIn, 1) * fmLevel);
+			fm = (In.ar(fmIn, 1)),
+			pm = fm * (pmLevel * 8);
+			fm = fm * fmLevel;
 			freq = freq.max(0.01);
 			freq = Select.ar(fm < 0, [
 				fm.linexp(0.0, 1.0, freq, 20000.0),
@@ -100,6 +110,7 @@
 			);*/
 			sig = SquareOS.ar(
 				freq.max(0.01).min(20000),
+				pm,
 				width: pw.max(0.002).min(0.998).lag(0.02),
 				oversample: 4,
 				mul: (amp * 0.5).lag(0.02)
@@ -107,7 +118,8 @@
 			Out.ar(out, sig.checkBadValues);
 		})
 	],
-	inputConfig: Dictionary[\fmIn -> \a],
+	inputConfig: Dictionary[\fmIn -> [\a, 2]],
+	outputConfig: Dictionary[\out -> [\a, 2]],
 	sync: {|self, source|
 		var sourceBus,
 		summers = source.modsummers ? Dictionary.new;
@@ -185,6 +197,31 @@
 			}.defer;
 		}
 	},
+	usePm: false,
+	setFmOrPm: {|self, fm = true|
+		self.usePm = fm.not;
+		self.setParams([\pmLevel, \fmLevel].at(fm.asInteger), 0);
+		self.updateGuiFm();
+	},
+	updateGuiFm: {|self|
+		self.views !? {|v|
+			var params = [\fmLevel, \pmLevel],
+			dparam = params[self.usePm.asInteger];
+			{
+				var parent = v[dparam][0].parent;
+				parent !? {|p|
+					(p.bounds.width == 0).if({
+						var sparam = params[(self.usePm.asInteger - 1).abs],
+						sview = v[sparam][0].parent,
+						dview = v[dparam][0].parent,
+						bounds = sview.bounds;
+						dview.bounds = bounds;
+						sview.bounds = Rect(0, 0, 0, 0);
+					});
+				}
+			}.defer;
+		}
+	},
 	handleSync: {|self, param|
 		self.syncedWith !? {|sw|
 			sw.do({|e|
@@ -199,10 +236,13 @@
 		o[\syncedWith] = (self.syncedWith ? List.new).collect({|e| e.name }).asSet.asList;
 		o[\syncedFrom] = (self.syncedFrom ? Event.new).name;
 		o[\freqSpec] = self.freqSpec;
+		o[\usePm] = self.usePm;
 		cb.value(o);
 	},
 	customSetFromSettings: {|self, dict, cb|
 		self.freqSpec = dict[\freqSpec] ? \freq;
+		self.usePm = dict[\usePm] ? false;
+		self.setFmOrPm(self.usePm.not);
 		cb.value(dict);
 	},
 	setSyncFromSettings: {|self, settings, modules|
@@ -239,23 +279,21 @@
 			["Pw", \pw, \unipolar],
 			["Fm", \fmLevel, \pan],
 			["Amp", \amp, \amp],
-			["Freq", \freqscale, ControlSpec(-64.0, 64.0)]
+			["Freq", \freqscale, ControlSpec(-64.0, 64.0)],
+			["Pm", \pmLevel, \amp]
 		],
 		ne = 5,
 		width = style.calculateViewWidth(pl, gl, ne, ks * ne),
 		height = style.calculateViewHeight(pt, lh, ks + th),
-		bs = (canSync).if({ [["|\\"], ["_|"]] }, { [["~"], ["|\\"]] }),
+		bs = [["~"], ["|\\"], ["_|"]],
 		o = Button(bounds: bw@bh)
 		.states_(bs)
 		.action_({|v|
-			self.switchSynthDef(v.value + canSync.asInteger,
+			self.switchSynthDef(v.value,
 				{ self.handleSync }
 			);
 		})
-		.value_(
-			(self.selectedSynthDef ? (0 + canSync.asInteger)) -
-			canSync.asInteger
-		),
+		.value_(self.selectedSynthDef ? 0),
 		fs,
 		view = View(parent, width@height),
 		f = view.addFlowLayout(pl@pt, gl@gt),
@@ -304,8 +342,20 @@
 		self.views[\sync] = sb;
 		self.views[\range] = fs;
 		style.knobRow(view, knobConf, self, ks, true);
+		self.views[\pmLevel][2].mouseUpAction_({|v, x, y, mod|
+			(mod == 524288).if({
+				self.setFmOrPm(self.usePm);
+			});
+		});
+		self.views[\fmLevel][2].mouseUpAction_({|v, x, y, mod|
+			(mod == 524288).if({
+				self.setFmOrPm(self.usePm);
+			});
+		});
 		self.views[\freqscale][0].parent.bounds = Rect(0, 0, 0, 0);
+		self.views[\pmLevel][0].parent.bounds = Rect(0, 0, 0, 0);
 		self.updateGuiSync(self.syncedFrom.notNil);
+		self.updateGuiFm();
 		self.views[\view] = view;
 		self.addBypassAction();
 		view;
