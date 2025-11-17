@@ -118,8 +118,8 @@
 			Out.ar(out, sig.checkBadValues);
 		})
 	],
-	inputConfig: Dictionary[\fmIn -> [\a, 2]],
-	outputConfig: Dictionary[\out -> [\a, 2]],
+	inputConfig: Dictionary[\fmIn -> \a],
+	outputConfig: Dictionary[\out -> \a],
 	sync: {|self, source|
 		var sourceBus,
 		summers = source.modsummers ? Dictionary.new;
